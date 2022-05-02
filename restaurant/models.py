@@ -22,8 +22,7 @@ class Guest(models.Model):
         CASH = 'CASH'
         BITCOIN = 'BITCOIN'
         PHONE = 'PHONE'
-    payment = models.Charfield(
+    payment = models.CharField(
         max_length=20,
         choices=PaymentType.choices
     )
-
