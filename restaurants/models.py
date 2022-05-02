@@ -29,4 +29,15 @@ class Guest(models.Model):
 
 
 class Group(models.Model):
-    group_name = models.CharField(max_length=128, null=False, blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False)
+
+
+class Menu(models.Model):
+    group = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
+    name = models.CharField(max_length=31)
+    price = models.PositiveIntegerField()
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.name
