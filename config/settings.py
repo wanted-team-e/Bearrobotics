@@ -50,6 +50,8 @@ DJANGO_APPS = [
 ]
 
 PROJECT_APPS = [
+    'restaurants',
+    'employees',
 ]
 
 THIRD_PARTY_APPS = [
