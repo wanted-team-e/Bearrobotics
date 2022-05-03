@@ -1,16 +1,23 @@
 from django.db import models
 
 
-# Create your models here.
-
 class Restaurant(models.Model):
+    """
+        editor : 김채욱
+    """
     city = models.CharField(max_length=128, null=False, blank=False)
     address = models.CharField(max_length=256)
-    restaurant = models.CharField(max_length=256, null=False, blank=False)
+    name = models.CharField(max_length=256, null=False, blank=False)
     group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class Guest(models.Model):
+    """
+        editor : 서재환
+    """
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
     price = models.PositiveIntegerField(default=0)
     number_of_party = models.PositiveIntegerField(default=0)
@@ -29,10 +36,19 @@ class Guest(models.Model):
 
 
 class Group(models.Model):
+    """
+        editor : 강정희
+    """
     name = models.CharField(max_length=128, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
 
 
 class Menu(models.Model):
+    """
+        editor : 이형준
+    """
     group = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
     name = models.CharField(max_length=31)
     price = models.PositiveIntegerField()
