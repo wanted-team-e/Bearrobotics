@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db.models import Q, Sum
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import viewsets, status
@@ -45,10 +46,22 @@ def _exception_handling(request):
         query &= Q(restaurant__group__name=requests.get('group'))
 
     # request 입력값에 대한 예외처리
-    if requests.get('start_time') > requests.get('end_time'):
-        occurred = True
-        error = Response({'error_message': "조회 시작 날짜보다 끝 날짜가 빠를 수 없습니다."},
-                         status=status.HTTP_400_BAD_REQUEST)
+
+    if requests.get('start_date') and requests.get('end_time'):
+        try:
+            date_format = "%Y-%m-%d %H:%M:%S"
+            datetime.strptime(requests.get('start_time'), date_format)
+            datetime.strptime(requests.get('end_time'), date_format)
+
+            if requests.get('start_time') > requests.get('end_time'):
+                occurred = True
+                error = Response({'error_message': "조회 시작 날짜보다 끝 날짜가 빠를 수 없습니다."},
+                                 status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            occurred = True
+            error = Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
+                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                             status=status.HTTP_400_BAD_REQUEST)
 
     if requests.get('min_price') and requests.get('max_price'):
         if requests.get('min_price').isdigit() or requests.get('max_price').isdigit():
@@ -134,3 +147,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def payment(self, request):
+        pass
