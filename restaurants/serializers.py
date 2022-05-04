@@ -15,3 +15,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'address',
             'group',
         )
+        read_only_fields = (
+            'group',
+        )
+
+class TotalPriceDocsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Restaurant
+        fields = (
+            'name',
+        )

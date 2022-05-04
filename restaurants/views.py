@@ -1,12 +1,13 @@
 from datetime import datetime
 from django.db.models import Q, Sum, Count
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from restaurants.models import Restaurant, Guest
-from restaurants.serializers import RestaurantSerializer
+from restaurants.serializers import RestaurantSerializer, TotalPriceDocsSerializer
 
 
 def _request_param(request):
@@ -104,10 +105,28 @@ class RestaurantViewset(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'total_price':
+            return TotalPriceDocsSerializer
+        else:
+            return RestaurantSerializer
+
+
+    @swagger_auto_schema(operation_summary='create뷰입니다.')
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary='update뷰입니다.')
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+
+    @swagger_auto_schema(operation_summary='전체 가격 반환 api입니다.')
     @action(detail=False, methods=['get'])
     def total_price(self, request):
         """
             editor : 강정희
+
         """
         exception_chk = _exception_handling(request)
 
