@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -151,3 +151,50 @@ class RestaurantViewset(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def payment(self, request):
         pass
+
+    @action(detail=False, methods=['get'])
+    def party(self, request):
+
+        """
+            작성자: 김채욱
+        """
+
+        exception_chk = _exception_handling(request)
+
+        if exception_chk.get('occurred'):
+            return exception_chk.get('error')
+
+        try:
+
+            query = exception_chk.get('query')
+
+            guests = Guest.objects.filter(query)
+
+            timeunit = exception_chk.get('timeunit').upper()
+            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+
+            if timeunit and timeunit in timeunit_group:
+                if timeunit == 'YEAR':
+                    guests = guests.values('number_of_party') \
+                        .annotate(year=ExtractYear('timestamp'),restaurant_id=F('restaurant'), count=Count('number_of_party'))
+                elif timeunit == 'MONTH':
+                    guests = guests.values('number_of_party') \
+                        .annotate(month=ExtractMonth('timestamp'),restaurant_id=F('restaurant'), count=Count('number_of_party'))
+                elif timeunit == 'WEEK':
+                    guests = guests.values('number_of_party') \
+                        .annotate(week=ExtractWeek('timestamp'),restaurant_id=F('restaurant'), count=Count('number_of_party')) 
+                elif timeunit == 'DAY':
+                    guests = guests.values('number_of_party') \
+                        .annotate(day=ExtractDay('timestamp'),restaurant_id=F('restaurant'), count=Count('number_of_party'))
+                elif timeunit == 'HOUR':
+                    guests = guests.values('number_of_party') \
+                        .annotate(hour=ExtractHour('timestamp'),restaurant_id=F('restaurant'), count=Count('number_of_party'))
+
+                return Response(guests, status=status.HTTP_200_OK)
+            else:
+                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                            status=status.HTTP_400_BAD_REQUEST)
