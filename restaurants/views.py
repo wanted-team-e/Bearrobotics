@@ -1,4 +1,5 @@
-from django.db.models import Q, Min, Max
+from django.db.models import Q, Min, Max, Sum
+from django.db.models.functions import ExtractMonth
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,7 +26,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
         max_party = request.query_params.get('max_party', None)
         group = request.query_params.get('group', None)
 
-        if start_time and end_time and timeunit:
+        if start_time and end_time:
             try:
 
                 # if not min_price: min_price = Guest.objects.aggrgate(Min('price'))['price_min']
@@ -43,12 +44,27 @@ class RestaurantViewset(viewsets.ModelViewSet):
                     query &= Q(restaurant__group__id=group)
 
                 guests = Guest.objects.filter(query)
-            except Exception as e:
-                print(e)
-                return Response({'error_message': "기간은 'start_time=yyyy-mm-dd&end_time=yyyy-mm-dd"
-                                                  "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+
+                timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+                timeunit = timeunit.upper()
+
+                if timeunit and timeunit in timeunit_group:
+                    try:
+                        guests = guests.values('restaurant_id') \
+                                .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
+                        # guests = guests.values('restaurant_id') \
+                        #         .annotate(month=ExtractMonth('timestamp'),total_price=Sum('price'))\
+                        #         .values('month', 'restaurant_id', 'total_price')
+
+                    except Exception as e:
+                        print(e)
+                        return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                        status=status.HTTP_400_BAD_REQUEST)
+            except ValueError:
+                return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00"
+                                                  "&end_time=yyyy-mm-dd 00:00:00 형식으로 요청 가능합니다."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-
+        results = guests
 
         return Response(results, status=status.HTTP_200_OK)
