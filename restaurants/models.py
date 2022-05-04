@@ -6,7 +6,7 @@ from django.db import models
 class Restaurant(models.Model):
     city = models.CharField(max_length=128, null=False, blank=False)
     address = models.CharField(max_length=256)
-    restaurant = models.CharField(max_length=256, null=False, blank=False)
+    name = models.CharField(max_length=256, null=False, blank=False)
     group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE)
 
 
