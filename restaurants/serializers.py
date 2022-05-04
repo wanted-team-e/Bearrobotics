@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from restaurants.models import Restaurant, Guest
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -28,3 +27,4 @@ class GuestSerializer(serializers.ModelSerializer):
             'timestamp',
             'payment'
         )
+
