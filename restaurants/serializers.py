@@ -7,6 +7,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
     """
         editor : 강정희
     """
+    group_name = serializers.ReadOnlyField(source='group.name')
+
     class Meta:
         model = Restaurant
         fields = (
@@ -14,9 +16,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'city',
             'address',
             'group',
-        )
-        read_only_fields = (
-            'group',
+            'group_name',
         )
 
 class TotalPriceDocsSerializer(serializers.ModelSerializer):
