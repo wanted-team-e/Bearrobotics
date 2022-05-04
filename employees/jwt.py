@@ -10,12 +10,14 @@ def decode_jwt(access_token):
     access_token = access_token[1:-1]
     return jwt.decode(access_token, SECRET_KEY, algorithms='HS256',options={"verify_aud": False},)
 
-def generate_access_token(email):
+def generate_access_token(employee):
     iat = datetime.now()
     exp = iat + timedelta(days=7)
     data = {
         "iat": iat.timestamp(),
         "exp": exp.timestamp(),
-        "email": email,
+        "email": employee.email,
+        "username": employee.username,
+        "group": employee.group,
     }
     return encode_jwt(data)

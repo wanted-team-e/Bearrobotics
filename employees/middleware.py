@@ -12,4 +12,36 @@ class JsonWebTokenMiddleWare(object):
         self.get_response = get_response
 
     def __call__(self, request):
-        pass
+        try:
+            if (
+                request.path != "/api/users/signup"
+                and request.path != "/api/users/login"
+                and "admin" not in request.path
+                and "swagger" not in request.path
+            ):
+
+                headers = request.headers
+                access_token = headers.get("Authorization", None)
+                if not access_token:
+                    raise PermissionDenied()
+
+                payload = decode_jwt(access_token)
+                email = payload.get("email", None)
+
+                if not email:
+                    raise PermissionDenied()
+                Employee.objects.get(email=email)
+            response = self.get_response(request)
+
+            return response
+
+        except (PermissionDenied, Employee.DoesNotExist):
+            return JsonResponse(
+                {"error": "Authorization Error"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        except ExpiredSignatureError:
+            return JsonResponse(
+                {"error": "Expired token. Please log in again."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
