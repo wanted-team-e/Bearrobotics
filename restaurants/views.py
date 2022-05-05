@@ -69,7 +69,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/total_price',
-        operation_summary='Return Fields: (timeunit, restaurant_id, total_price)'
+        operation_summary='Return Fields: (timeunit, restaurant_id, total_price)',
+        manual_parameters=commons.set_swagger()
     )
     @action(detail=False, methods=['get'])
     def total_price(self, request):
@@ -117,7 +118,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/payment',
-        operation_summary='Return Fields: (timeunit, restaurant_id, payment, count)'
+        operation_summary='Return Fields: (timeunit, restaurant_id, payment, count)',
+        manual_parameters=commons.set_swagger()
     )
     @action(detail=False, methods=['get'])
     def payment(self, request):
@@ -226,7 +228,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/:pk/total_price_restaurant',
-        operation_summary='Return Fields: (timeunit, restaurant_id, total_price)'
+        operation_summary='Return Fields: (timeunit, restaurant_id, total_price)',
+        manual_parameters=commons.set_swagger()
     )
     @action(detail=True, methods=['get'])
     def total_price_restaurant(self, request, pk):
@@ -274,7 +277,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/:pk/payment_restaurant',
-        operation_summary='Return Fields: (timeunit, restaurant_id, payment, count)'
+        operation_summary='Return Fields: (timeunit, restaurant_id, payment, count)',
+        manual_parameters=commons.set_swagger()
     )
     @action(detail=True, methods=['get'])
     def payment_restaurant(self, request, pk):

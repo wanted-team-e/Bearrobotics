@@ -3,7 +3,7 @@ from django.db import models
 
 class Restaurant(models.Model):
     """
-        editor : 김채욱
+        작성자 : 김채욱
     """
     city = models.CharField(max_length=128, null=False, blank=False)
     address = models.CharField(max_length=256)
@@ -16,7 +16,7 @@ class Restaurant(models.Model):
 
 class Guest(models.Model):
     """
-        editor : 서재환
+        작성자 : 서재환
     """
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
     price = models.PositiveIntegerField(default=0)
@@ -37,7 +37,7 @@ class Guest(models.Model):
 
 class Group(models.Model):
     """
-        editor : 강정희
+        작성자 : 강정희
     """
     name = models.CharField(max_length=128, null=False, blank=False)
 
@@ -47,7 +47,7 @@ class Group(models.Model):
 
 class Menu(models.Model):
     """
-        editor : 이형준
+        작성자 : 이형준
     """
     group = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
     name = models.CharField(max_length=31)
