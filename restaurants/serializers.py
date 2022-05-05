@@ -1,11 +1,25 @@
 from rest_framework import serializers
 
-from restaurants.models import Restaurant
+from restaurants.models import Restaurant, Guest
 
 
-class RestaurantSerializer(serializers.ModelSerializer):
+class RestaurantCUDSerializer(serializers.ModelSerializer):
     """
-        editor : 강정희
+        작성자 : 강정희
+    """
+    class Meta:
+        model = Restaurant
+        fields = (
+            'name',
+            'city',
+            'address',
+            'group',
+        )
+
+
+class RestaurantRSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 강정희
     """
     group_name = serializers.ReadOnlyField(source='group.name')
 
@@ -15,13 +29,38 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'name',
             'city',
             'address',
-            'group',
             'group_name',
         )
 
+
 class TotalPriceDocsSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 강정희
+    """
+    timeunit = serializers.CharField()
+    total_price = serializers.IntegerField()
+
     class Meta:
-        model = Restaurant
+        model = Guest
         fields = (
-            'name',
+            'timeunit',
+            'restaurant',
+            'total_price',
+        )
+
+
+class PaymentDocsSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 강정희
+    """
+    timeunit = serializers.CharField()
+    count = serializers.IntegerField()
+
+    class Meta:
+        model = Guest
+        fields = (
+            'timeunit',
+            'restaurant',
+            'payment',
+            'count',
         )
