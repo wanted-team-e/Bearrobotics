@@ -6,19 +6,21 @@ from django.db import models
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def create_user(self, email, username, password=None, **kwargs):
+    def create_user(self, email, username, password, **kwargs):
 
         if not email:
             raise ValueError('must have user email')
+        if not password:
+            raise ValueError('must have user password')
         if not username:
             raise ValueError('must have user username')
 
         user = self.model(
             email=email,
             username=username,
+            password=password,
             **kwargs,
         )
-        user.set_password(password)
         user.save(using=self._db)
         return user
 

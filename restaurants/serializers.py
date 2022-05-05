@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from restaurants.models import Restaurant
+from restaurants.models import Restaurant, Menu
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -24,4 +24,16 @@ class TotalPriceDocsSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = (
             'name',
+        )
+
+
+class MenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Menu
+        fields = (
+            'group',
+            'name',
+            'price',
+            'created_at',
+            'updated_at',
         )
