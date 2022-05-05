@@ -49,7 +49,7 @@ class Menu(models.Model):
     """
         editor : 이형준
     """
-    group = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
+    group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE)
     name = models.CharField(max_length=31)
     price = models.PositiveIntegerField()
     created_at = models.DateField(auto_now_add=True)

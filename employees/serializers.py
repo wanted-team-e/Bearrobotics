@@ -20,7 +20,6 @@ class AuthenticationSerializer(serializers.ModelSerializer):
         def validate(self, data):
             email = data.get('email')
             password = data.get('password')
-
             employee = authenticate(email=email, password=password)
 
             if employee is None:
@@ -33,6 +32,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = (
             'email',
             'username',
-            'rank',
+            'rank_type',
             'group',
         )

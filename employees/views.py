@@ -14,8 +14,14 @@ class UserViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin, GenericViewSet):
     queryset = Employee.objects.all()
 
+    def get_queryset(self):
+        if self.action == 'list':
+            return Employee.objects.all().order_by('-group')
+        else:
+            return Employee.objects.all()
+
     def get_serializer_class(self):
-        if self.action == ['signup','login']:
+        if self.action == 'signup' and 'login':
             return AuthenticationSerializer
         else:
             return EmployeeSerializer

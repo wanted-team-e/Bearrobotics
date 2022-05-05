@@ -40,8 +40,19 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     email = models.EmailField(max_length=255, unique=True)
     username = models.CharField(max_length=15)
-    rank = models.CharField(max_length=15, blank=True, default='')
-    group = models.ForeignKey('employees.Employee', on_delete=models.CASCADE, null=True)
+    phone_number = models.CharField(max_length=31, blank=True, default='')
+
+    class RankType(models.TextChoices):
+        Super = 'SUPER'
+        Confirm = 'CONFIRM'
+        Normal = 'NORNAL'
+
+    rank_type = models.CharField(
+        max_length=15,
+        choices=RankType.choices,
+        default=RankType.Normal
+    )
+    group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE, null=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

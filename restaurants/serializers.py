@@ -25,3 +25,5 @@ class TotalPriceDocsSerializer(serializers.ModelSerializer):
         fields = (
             'name',
         )
+
+class
