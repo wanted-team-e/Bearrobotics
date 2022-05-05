@@ -6,6 +6,8 @@ from rest_framework.response import Response
 
 from restaurants.models import Guest
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 def _request_param(request):
     """
@@ -96,3 +98,20 @@ def exception_handling(request):
         'error': error
     }
     return result
+
+
+def set_swagger():
+    """
+        작성자 : 김채욱
+    """
+    param_1 = openapi.Parameter( 'start_time', openapi.IN_QUERY, description='start time/end time(must)', type=openapi.TYPE_STRING )
+    param_2 = openapi.Parameter( 'endtime', openapi.IN_QUERY, description='start time/end time(must)', type=openapi.TYPE_STRING )
+    param_3 = openapi.Parameter( 'timeunit', openapi.IN_QUERY, description='aggregation time window (must)', type=openapi.TYPE_STRING )
+    param_4 = openapi.Parameter( 'min_price', openapi.IN_QUERY, description='price range(optional)', type=openapi.TYPE_INTEGER )
+    param_5 = openapi.Parameter( 'max_price', openapi.IN_QUERY, description='price range(optional)', type=openapi.TYPE_INTEGER )
+    param_6 = openapi.Parameter( 'min_party', openapi.IN_QUERY, description='number of party(optional)', type=openapi.TYPE_INTEGER )
+    param_7 = openapi.Parameter( 'max_party', openapi.IN_QUERY, description='number of party(optional)', type=openapi.TYPE_INTEGER )
+    param_8 = openapi.Parameter( 'group', openapi.IN_QUERY, description='restaurant group(optional)', type=openapi.TYPE_INTEGER )
+
+    manual_parameters = [param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8]
+    return manual_parameters

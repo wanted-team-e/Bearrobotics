@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from restaurants.models import Restaurant, Guest
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer    
 
 from restaurants.utils import commons
 
@@ -25,6 +25,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
             return TotalPriceDocsSerializer
         elif self.action == 'payment' or self.action == 'payment_restaurant':
             return PaymentDocsSerializer
+        elif self.action == 'party' or self.action == 'party_restaurant':
+            return PartyDocsSerializer
         else:
             return RestaurantCUDSerializer
 
@@ -161,6 +163,13 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
 
+
+
+    @swagger_auto_schema(
+        operation_description='GET /api/restaurant/party',
+        operation_summary='Return Fields: (timeunit, resturant_id, number_of_party, count)',
+        manual_parameters=commons.set_swagger()
+        )
     @action(detail=False, methods=['get'])
     def party(self, request):
 
@@ -311,6 +320,61 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(e)
+            return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    @swagger_auto_schema(
+        operation_description='GET /api/restaurant/:pk/party_restaurant',
+        operation_summary='Return Fields: (timeunit, resturant_id, number_of_party, count)',
+        manual_parameters=commons.set_swagger()
+        )
+    @action(detail=True, methods=['get'])
+    def party_restaurant(self, request, pk):
+
+        """
+            작성자: 김채욱
+        """
+
+        exception_chk = commons.exception_handling(request)
+
+        if exception_chk.get('occurred'):
+            return exception_chk.get('error')
+
+        try:
+
+            query = exception_chk.get('query') & Q(restaurant__id=pk)
+
+            guests = Guest.objects.filter(query)
+
+            timeunit = exception_chk.get('timeunit').upper()
+            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+
+            if timeunit and timeunit in timeunit_group:
+                if timeunit == 'YEAR':
+                    guests = guests.values('number_of_party') \
+                        .annotate(year=ExtractYear('timestamp'), count=Count('number_of_party'))
+                                  
+                elif timeunit == 'MONTH':
+                    guests = guests.values('number_of_party') \
+                        .annotate(month=ExtractMonth('timestamp'), count=Count('number_of_party'))
+                elif timeunit == 'WEEK':
+                    guests = guests.values('number_of_party') \
+                        .annotate(week=ExtractWeek('timestamp'), count=Count('number_of_party'))
+                elif timeunit == 'DAY':
+                    guests = guests.values('number_of_party') \
+                        .annotate(day=ExtractDay('timestamp'), count=Count('number_of_party'))
+                elif timeunit == 'HOUR':
+                    guests = guests.values('number_of_party') \
+                        .annotate(hour=ExtractHour('timestamp'), count=Count('number_of_party'))
+
+                return Response(guests, status=status.HTTP_200_OK)
+            else:
+                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)

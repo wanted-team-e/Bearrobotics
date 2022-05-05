@@ -64,3 +64,20 @@ class PaymentDocsSerializer(serializers.ModelSerializer):
             'payment',
             'count',
         )
+
+class PartyDocsSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 김채욱
+    """
+    timeunit = serializers.CharField()
+    count = serializers.IntegerField()
+    restaurant_id = serializers.IntegerField()
+    
+    class Meta:
+        model = Guest
+        fields = (
+            'number_of_party',
+            'timeunit',
+            'restaurant_id',
+            'count',
+        )
