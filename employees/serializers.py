@@ -4,7 +4,7 @@ from rest_framework import serializers
 from employees.models import Employee
 
 
-class AuthenticationSerializer(serializers.ModelSerializer):
+class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = (
@@ -14,18 +14,40 @@ class AuthenticationSerializer(serializers.ModelSerializer):
             'username',
         )
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True}
         }
+    def create(self, validated_data):
+        email = validated_data['email']
+        username = validated_data['username']
+        password = validated_data['password']
+        user = Employee.objects.create_user(
+            email = email,
+            username = username,
+            password=password
+        )
+        user.save()
+        return user
 
-        def validate(self, data):
-            email = data.get('email')
-            password = data.get('password')
 
-            employee = authenticate(email=email, password=password)
+class UserLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = (
+            'id',
+            'email',
+            'password',
+        )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    def validate(self, data):
+        email = data.get('email',None)
+        user = Employee.objects.filter(email=email).first()
+        if user is None:
+            return None
+        return user
 
-            if employee is None:
-                return None
-            return employee
+
 
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,6 +55,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = (
             'email',
             'username',
-            'rank',
+            'rank_type',
             'group',
         )
