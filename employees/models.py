@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class UserManager(BaseUserManager):
@@ -45,7 +47,6 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=31, blank=True, default='')
 
     class RankType(models.TextChoices):
-        Super = 'SUPER'
         Confirm = 'CONFIRM'
         Normal = 'NORMAL'
 
@@ -68,3 +69,4 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
+

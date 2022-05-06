@@ -4,11 +4,14 @@ from django.db.models import Q, Sum, Count, F
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from employees.permissions import EmployeePermission
 from restaurants.models import Restaurant, Guest
+from restaurants.permissions import RestaurantPermission
 from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
 
 from restaurants.utils import commons
@@ -17,6 +20,14 @@ from restaurants.utils import commons
 class RestaurantViewset(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantCUDSerializer
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [RestaurantPermission]
+        return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
