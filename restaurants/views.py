@@ -1,13 +1,15 @@
 from datetime import datetime
+from tokenize import group
 from django.db.models import Q, Sum, Count
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
 
-from restaurants.models import Restaurant, Guest
-from restaurants.serializers import RestaurantSerializer, TotalPriceDocsSerializer
+from restaurants.models import Restaurant, Guest, Group
+from restaurants.serializers import GuestSerializer, RestaurantSerializer, TotalPriceDocsSerializer
 
 
 def _request_param(request):
@@ -124,6 +126,11 @@ def _exception_handling(request):
     return result
 
 
+class GuestViewset(viewsets.ModelViewSet):
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
+
+
 class RestaurantViewset(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
@@ -149,6 +156,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
     def total_price(self, request):
         """
             editor : 강정희
+
         """
         exception_chk = _exception_handling(request)
 
@@ -241,19 +249,43 @@ class RestaurantViewset(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-    @action(detail=False, methods=['get'])
-    def group_total_cost(self, request):
-        """
-            작성자: 서재환
-        """
-        exception_chk = _exception_handling(request)
+from rest_framework.decorators import api_view
 
-        if exception_chk.get('occurred'):
-            return exception_chk.get('error')
+"""
+    editor: 서재환
+"""
+@api_view(['GET'])
+def get_guest(self):
+    group_list = Guest.objects.all()
+    serializer = GuestSerializer(group_list, many=True)
+    return Response(serializer.data)
 
-        try:
+@api_view(['GET'])
+def get_certain_group_list(self, request):
+    restaurants_id_list = []
+    group_name = request.GET.get('group_name', False)
 
-            query = exception_chk.get('query')
+    if not group_name:
+        return Response({'error_message': '인자 값으로 그룹 이름을 넣어주세요.'}, stats=status.HTTP_400_BAD_REQUEST)
+    
+    groups = Group.objects.all().filter(name=group_name)
 
-        except Exception as e:
-            return 
+    if len(groups) == 0:
+        return Response({'error_message': '해당 그룹이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
+
+    group_id = groups[0].id 
+    
+    restaurants = Restaurant.objects.all().filter(group_id==group_id)
+
+    if len(restaurants) == 0:
+        return Response({'error_message': '해당 그룹에 해당하는 레스토랑이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
+
+    for id in restaurants:
+        restaurants_id_list.append(restaurants[id])
+    restaurants_id_list = set(restaurants_id_list)
+
+    for id in restaurants_id_list:
+        certain_group = Guest.objects.all().filter(restaurnat_id = id)
+
+    serializer = GuestSerializer(certain_group, many=True)
+    return Response(serializer.data)

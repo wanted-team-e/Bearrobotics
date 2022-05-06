@@ -14,6 +14,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'group',
         )
 
+
 class GuestSerializer(serializers.ModelSerializer):
     """
         editor : 서재환
@@ -21,10 +22,23 @@ class GuestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guest
         fields = (
-            'restaurant',
+            'restaurant_id',
             'price',
             'number_of_party',
             'timestamp',
             'payment'
+        )
+
+
+        read_only_fields = (
+            'group',
+        )
+
+
+class TotalPriceDocsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Restaurant
+        fields = (
+            'name',
         )
 
