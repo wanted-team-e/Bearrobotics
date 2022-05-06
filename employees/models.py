@@ -6,19 +6,21 @@ from django.db import models
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def create_user(self, email, username, password=None, **kwargs):
+    def create_user(self, email, username, password, **kwargs):
 
         if not email:
             raise ValueError('must have user email')
+        if not password:
+            raise ValueError('must have user password')
         if not username:
             raise ValueError('must have user username')
 
         user = self.model(
             email=email,
             username=username,
+            password=password,
             **kwargs,
         )
-        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -40,8 +42,19 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     email = models.EmailField(max_length=255, unique=True)
     username = models.CharField(max_length=15)
-    rank = models.CharField(max_length=15, blank=True, default='')
-    group = models.ForeignKey('employees.Employee', on_delete=models.CASCADE, null=True)
+    phone_number = models.CharField(max_length=31, blank=True, default='')
+
+    class RankType(models.TextChoices):
+        Super = 'SUPER'
+        Confirm = 'CONFIRM'
+        Normal = 'NORMAL'
+
+    rank_type = models.CharField(
+        max_length=15,
+        choices=RankType.choices,
+        default=RankType.Normal
+    )
+    group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE, null=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

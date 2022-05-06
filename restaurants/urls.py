@@ -1,11 +1,11 @@
-from django.urls import include, path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from restaurants.views import *
-from .import views
+
+from restaurants.views import RestaurantViewset, GuestViewset, get_guest
 
 router = DefaultRouter(trailing_slash=False)
-router.register('guest', views.GuestViewset)
 router.register(r'restaurant', RestaurantViewset, basename='restaurants')
+router.register('guest', GuestViewset)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -13,5 +13,4 @@ urlpatterns = [
 
 urlpatterns += [
     path('group/', get_guest,),
-    # path(r'^group/(?P<group_name>[\w-][0-9]{4})/$', get_certain_group_list),
 ]

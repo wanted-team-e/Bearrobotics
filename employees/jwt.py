@@ -17,7 +17,5 @@ def generate_access_token(employee):
         "iat": iat.timestamp(),
         "exp": exp.timestamp(),
         "email": employee.email,
-        "username": employee.username,
-        "group": employee.group,
     }
     return encode_jwt(data)

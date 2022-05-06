@@ -1,139 +1,17 @@
-from datetime import datetime
-from tokenize import group
 from inspect import Parameter
 from msilib import type_string
-
 from django.db.models import Q, Sum, Count, F
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
-
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from restaurants.models import Restaurant, Guest, Group
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer   
+from restaurants.models import Restaurant, Guest
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
+
 from restaurants.utils import commons
-
-def _request_param(request):
-    """
-        editor : 강정희
-    """
-    result = {
-        'start_time': request.query_params.get('start_time', None),
-        'end_time': request.query_params.get('end_time', None),
-        'timeunit': request.query_params.get('timeunit', None),
-        'min_price': request.query_params.get('min_price', None),
-        'max_price': request.query_params.get('max_price', None),
-        'min_party': request.query_params.get('min_party', None),
-        'max_party': request.query_params.get('max_party', None),
-        'group': request.query_params.get('group', None),
-        'city' : request.query_params.get('city', None),
-        'address' : request.query_params.get('address', None),
-    }
-    return result
-
-
-def _exception_handling(request):
-    """
-        editor : 강정희
-    """
-    requests = _request_param(request)
-
-    timeunit = requests.get('timeunit')
-    occurred = False
-    error = ''
-
-    query = Q(timestamp__range=(requests.get('start_time'), requests.get('end_time')))
-
-    if requests.get('min_price') and requests.get('max_price'):
-        query &= Q(price__range=(requests.get('min_price'), requests.get('max_price')))
-    if requests.get('min_party') and requests.get('max_party'):
-        query &= Q(number_of_party__range=(requests.get('min_party'), requests.get('max_party')))
-    if requests.get('group'):
-        query &= Q(restaurant__group__name=requests.get('group'))
-    if requests.get('city'):
-        query &= Q(restaurant__city=request.get('city'))
-    if requests.get('address'):
-        query &= Q(restaurant__city=request.get('address'))
-
-    # request 입력값에 대한 예외처리
-
-    if requests.get('start_date') and requests.get('end_time'):
-        try:
-            date_format = "%Y-%m-%d %H:%M:%S"
-            datetime.strptime(requests.get('start_time'), date_format)
-            datetime.strptime(requests.get('end_time'), date_format)
-
-            if requests.get('start_time') > requests.get('end_time'):
-                occurred = True
-                error = Response({'error_message': "조회 시작 날짜보다 끝 날짜가 빠를 수 없습니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
-        except ValueError:
-            occurred = True
-            error = Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    if requests.get('min_price') and requests.get('max_price'):
-        if requests.get('min_price').isdigit() or requests.get('max_price').isdigit():
-            occurred = True
-            error = Response({'error_message': "조회 최소 가격, 최대 가격은 숫자값을 입력해야합니다."},
-                            status=status.HTTP_400_BAD_REQUEST)                            
-        if requests.get('min_price') > requests.get('max_price'):
-            occurred = True
-            error = Response({'error_message': "조회 최소 가격보다 최대 가격이 클 수 없습니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-
-    if requests.get('min_party') and requests.get('max_party'):
-        if requests.get('min_party').isdigit() or requests.get('max_party').isdigit():
-            occurred = True
-            error = Response({'error_message': "조회 최소 방문자 수, 최대 방문자 수는 숫자값을 입력해야합니다."},
-                            status=status.HTTP_400_BAD_REQUEST)                    
-        if requests.get('min_party') > requests.get('max_party'):
-            occurred = True
-            error = Response({'error_message': "조회 최소 방문자 수보다 최대 방문자 수가 클 수 없습니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    if requests.get('group'):
-        group_chk = Guest.objects.filter(query).exists()
-
-        if not group_chk:
-            occurred = True
-            error = Response({'error_message': "조회 그룹 이름이 존재하지 않습니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-    
-    if requests.get('city'):
-        city_chk = Restaurant.objects(filter(query).exists())
-
-        if not city_chk:
-            occurred = True
-            error = Response({'error_message': "조회 city 이름이 존재하지 않습니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    if request.get('address'):
-        address_chk = Restaurant.objects(filter(query).exists())
-
-        if not address_chk:
-            occurred = True
-            error = Response({'error_message': "조회 주소 이름이 존재하지 않습니다."}),
-
-
-    result = {
-        'timeunit': timeunit,
-        'query': query,
-        'occurred': occurred,
-        'error': error
-    }
-    return result
-
-
-class GuestViewset(viewsets.ModelViewSet):
-    queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
 
 
 class RestaurantViewset(viewsets.ModelViewSet):
@@ -235,7 +113,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -284,8 +162,10 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/party',
@@ -317,23 +197,23 @@ class RestaurantViewset(viewsets.ModelViewSet):
                 if timeunit == 'YEAR':
                     guests = guests.values('number_of_party') \
                         .annotate(year=ExtractYear('timestamp'), restaurant_id=F('restaurant'),
-                                count=Count('number_of_party'))
+                                  count=Count('number_of_party'))
                 elif timeunit == 'MONTH':
                     guests = guests.values('number_of_party') \
                         .annotate(month=ExtractMonth('timestamp'), restaurant_id=F('restaurant'),
-                                count=Count('number_of_party'))
+                                  count=Count('number_of_party'))
                 elif timeunit == 'WEEK':
                     guests = guests.values('number_of_party') \
                         .annotate(week=ExtractWeek('timestamp'), restaurant_id=F('restaurant'),
-                                count=Count('number_of_party'))
+                                  count=Count('number_of_party'))
                 elif timeunit == 'DAY':
                     guests = guests.values('number_of_party') \
                         .annotate(day=ExtractDay('timestamp'), restaurant_id=F('restaurant'),
-                                count=Count('number_of_party'))
+                                  count=Count('number_of_party'))
                 elif timeunit == 'HOUR':
                     guests = guests.values('number_of_party') \
                         .annotate(hour=ExtractHour('timestamp'), restaurant_id=F('restaurant'),
-                                count=Count('number_of_party'))
+                                  count=Count('number_of_party'))
 
                 return Response(guests, status=status.HTTP_200_OK)
             else:
@@ -341,8 +221,10 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/:pk/total_price_restaurant',
@@ -390,7 +272,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -443,8 +325,10 @@ class RestaurantViewset(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/:pk/party_restaurant',
@@ -476,7 +360,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
                 if timeunit == 'YEAR':
                     guests = guests.values('number_of_party') \
                         .annotate(year=ExtractYear('timestamp'), count=Count('number_of_party'))
-                                
+                                  
                 elif timeunit == 'MONTH':
                     guests = guests.values('number_of_party') \
                         .annotate(month=ExtractMonth('timestamp'), count=Count('number_of_party'))
@@ -496,10 +380,15 @@ class RestaurantViewset(viewsets.ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
 
+
 from rest_framework.decorators import api_view
+
+class GuestViewset(viewsets.ModelViewSet):
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
 
 """
     editor: 서재환
