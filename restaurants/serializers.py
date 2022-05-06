@@ -16,7 +16,6 @@ class RestaurantCUDSerializer(serializers.ModelSerializer):
         )
 
 
-
 class RestaurantRSerializer(serializers.ModelSerializer):
     """
         작성자 : 강정희
@@ -65,6 +64,7 @@ class PaymentDocsSerializer(serializers.ModelSerializer):
             'count',
         )
 
+
 class PartyDocsSerializer(serializers.ModelSerializer):
     """
         작성자 : 김채욱
@@ -83,14 +83,14 @@ class PartyDocsSerializer(serializers.ModelSerializer):
         )
 
 
-class GuestSerializer(serializers.ModelSerializer):
+class GuestCUDSerializer(serializers.ModelSerializer):
     """
-        editor : 서재환
+        작성자 : 서재환
     """
     class Meta:
         model = Guest
         fields = (
-            'restaurant_id',
+            'restaurant',
             'price',
             'number_of_party',
             'timestamp',
@@ -98,6 +98,18 @@ class GuestSerializer(serializers.ModelSerializer):
         )
 
 
-        read_only_fields = (
-            'group',
+class GuestRSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 강정희
+    """
+    restaurant_name = serializers.ReadOnlyField(source='restaurant.name')
+
+    class Meta:
+        model = Guest
+        fields = (
+            'restaurant_name',
+            'price',
+            'number_of_party',
+            'timestamp',
+            'payment'
         )
