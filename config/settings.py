@@ -72,7 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'employees.middleware.JsonWebTokenMiddleWare',
+    # 'employees.middleware.JsonWebTokenMiddleWare',
 ]
 
 REST_FRAMEWORK = {
@@ -82,7 +82,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
     'DEFAULT_AUTHENTICATION_CLASSES' : [
-        'employees.authentications.JSONWebTokenAuthentication',
+        # 'employees.authentications.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
