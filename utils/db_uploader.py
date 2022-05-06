@@ -55,7 +55,7 @@ def insert_guest():
         for row in data_reader:
             if row['id']:
                 Guest.objects.get_or_create(id = row['id'],
-                timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M"),
+                timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M:%S"),
                 restaurant_id = row['restaurant_id'],
                 price = int(row['price']),
                 number_of_party = int(row['number_of_party']),

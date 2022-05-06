@@ -1,3 +1,4 @@
+
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,15 +10,16 @@ from employees.serializers import EmployeeSerializer, UserSignupSerializer, User
 
 
 class UserViewSet(mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin, GenericViewSet):
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin, GenericViewSet):
 
     def get_queryset(self):
         if self.action == 'list':
             return Employee.objects.all().order_by('-group')
         else:
             return Employee.objects.all()
+
 
     def get_serializer_class(self):
         if self.action in 'signup':

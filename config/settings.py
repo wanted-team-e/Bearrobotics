@@ -22,7 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-env = environ.Env(DEBUG=(bool, True))
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, True)
+)
+
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, '.env')
 )
@@ -55,7 +59,6 @@ PROJECT_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-
     'drf_yasg',
 ]
 
