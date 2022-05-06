@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from restaurants.models import Restaurant, Guest
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer    
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
 
 from restaurants.utils import commons
 
@@ -382,3 +382,50 @@ class RestaurantViewset(viewsets.ModelViewSet):
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework.decorators import api_view
+
+class GuestViewset(viewsets.ModelViewSet):
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
+
+"""
+    editor: 서재환
+"""
+@api_view(['GET'])
+def get_guest(self):
+    group_list = Guest.objects.all()
+    serializer = GuestSerializer(group_list, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_certain_group_list(self, request):
+    restaurants_id_list = []
+    group_name = request.GET.get('group_name', False)
+
+    if not group_name:
+        return Response({'error_message': '인자 값으로 그룹 이름을 넣어주세요.'}, stats=status.HTTP_400_BAD_REQUEST)
+    
+    groups = Group.objects.all().filter(name=group_name)
+
+    if len(groups) == 0:
+        return Response({'error_message': '해당 그룹이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
+
+    group_id = groups[0].id 
+    
+    restaurants = Restaurant.objects.all().filter(group_id==group_id)
+
+    if len(restaurants) == 0:
+        return Response({'error_message': '해당 그룹에 해당하는 레스토랑이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
+
+    for id in restaurants:
+        restaurants_id_list.append(restaurants[id])
+    restaurants_id_list = set(restaurants_id_list)
+
+    for id in restaurants_id_list:
+        certain_group = Guest.objects.all().filter(restaurnat_id = id)
+
+    serializer = GuestSerializer(certain_group, many=True)
+    return Response(serializer.data)
+
