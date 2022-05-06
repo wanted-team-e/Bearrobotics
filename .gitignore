@@ -8,6 +8,9 @@ secrets.json
 # Django venv
 venv/
 
+# Django testdata
+testdata.json
+
 ### Django ###
 *.log
 *.pot

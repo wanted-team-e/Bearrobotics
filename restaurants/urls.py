@@ -13,5 +13,5 @@ urlpatterns = [
 
 urlpatterns += [
     path('group/', get_guest,),
-    path(r'^group/(?P<group_name>[\w-][0-9]{4})/$', get_certain_group_list),
+    # path(r'^group/(?P<group_name>[\w-][0-9]{4})/$', get_certain_group_list),
 ]
