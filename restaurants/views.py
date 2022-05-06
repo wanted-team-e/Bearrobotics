@@ -444,7 +444,7 @@ def get_certain_group_list(request, group_name):
         if len(certain_group) == 0:
             return Response({'error_message': '해당 그룹에 해당하는 레스토랑 결제 내역이 없습니다.'})
         serializer = GuestSerializer(certain_group, many=True)
-        return Response(serializer.data2)
+        return Response(serializer.data)
     
     if requests['start_time'] != None and requests['end_time'] != None:
         q2.add(Q(timestamp__range=(requests.get('start_time'), requests['end_time'])), q2.AND)
@@ -456,7 +456,7 @@ def get_certain_group_list(request, group_name):
             q2.add(Q(timestamp = requests['start_time']), q2.AND)
         q2 &= q2            
     
-    guests = Guest.objects.filter(q2)
+    guests = Guest.objects.filter(q2).order_by('timestamp')
 
     """
     파라미터 timeunit에 대한 처리
@@ -467,8 +467,25 @@ def get_certain_group_list(request, group_name):
     if not timeunit and timeunit in timeunit_list:
         return Response({'error_message': "파라미터 timeunit 값을 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR' 중 하나를 넣어주세요."})
     if timeunit == 'DAY':
-        guests = guests.values().annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
-
+        guests = Guest.objects.values() \
+            .annotate(day=ExtractDay('timestamp'), total_price = Sum('price'))
     certain_group += guests
     serializer = GuestSerializer(certain_group, many=True)
     return Response(serializer.data)
+
+    # if timeunit and timeunit in timeunit_group:
+    # if timeunit == 'YEAR':
+    #     guests = guests.values('restaurant_id') \
+    #         .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
+    # elif timeunit == 'MONTH':
+    #     guests = guests.values('restaurant_id') \
+    #         .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
+    # elif timeunit == 'WEEK':
+    #     guests = guests.values('restaurant_id') \
+    #         .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
+    # elif timeunit == 'DAY':
+    #     guests = guests.values('restaurant_id') \
+    #         .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
+    # elif timeunit == 'HOUR':
+    #     guests = guests.values('restaurant_id') \
+    #         .annotate(hour=ExtractHour('timestamp'), total_price=Sum('price'))
