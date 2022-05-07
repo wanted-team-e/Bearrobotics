@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import jwt
-from config.settings import SECRET_KEY
+from config.settings.base import SECRET_KEY
 
 def encode_jwt(data):
     return jwt.encode(data, SECRET_KEY, 'HS256')
