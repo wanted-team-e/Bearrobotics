@@ -1,12 +1,11 @@
 from datetime import datetime
 from django.db.models import Q, Sum
+from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import status
 
 from rest_framework.response import Response
-from django.core import serializers
 
 from restaurants.models import Guest, Restaurant, Group
-
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -180,8 +179,6 @@ def date_return_cons(request):
         q.add(Q(timestamp__range = (start_date, end_date)), q.AND)
     return q
 
-from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour, TruncDay
-
 
 def is_timeunit(request):
     """
@@ -300,7 +297,6 @@ def fake_deserializer_week(queryset):
     return res
 
 
-
 def fake_deserializer_day(queryset):
     """
     editor: 서재환
@@ -401,3 +397,10 @@ def timeunit_return_queryset(request, guests):
         return guests
 
     return Response({'error_message': "['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'] 중 하나의 인자 값을 넣으시오"})
+
+
+def is_city_exsist(city_name):
+    queryset = Restaurant.objects.filter(address__contains=city_name)
+    if len(queryset) == 0:
+        return False
+    return True

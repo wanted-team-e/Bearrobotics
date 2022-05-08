@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from restaurants.models import Restaurant, Guest, Group
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer, GroupSerializer    
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
 
 from restaurants.utils import commons
 
@@ -411,7 +411,6 @@ def get_certain_group_list(request, group_name):
     """
     q = Q()
     guests = []
-    queryset = None
     if group_name and not commons.is_group_name_in_group(group_name):
         return Response({'error_message': '해당 그룹이 없습니다.'})
     if commons.get_restaurants_id(group_name) == None:
@@ -446,3 +445,31 @@ def get_certain_group_list(request, group_name):
         guests = Guest.objects.filter(q)
         queryset = commons.timeunit_return_queryset(request, guests)
         return Response(queryset)
+
+
+@api_view(['GET'])
+def get_city_list(request, city_name):
+    """
+    editor: 서재환
+    """
+    q = Q()
+    restaurant_id_list = []
+    if not commons.is_city_exsist:
+        return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
+    if commons.is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
+        queryset = Restaurant.objects.filter(address__contains=city_name)
+        for restaurant in queryset:
+            restaurant_id_list.append(restaurant.id)
+        guests = Guest.objects.none()
+        for id in restaurant_id_list:
+            guest = Guest.objects.filter(restaurant_id=id)
+            guests |= guest
+        guests = guests.order_by('timestamp')
+        if len(guests) == 0:
+            return Response({'error_message': 'pos에 해당 도시에 있는 레스토랑이 없습니다.'})
+        guests = GuestSerializer(guests, many=True)
+        return Response(guests.data)
+    if not isinstance(commons.date_return_cons(request), Q):
+        return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
+    q &= commons.date_return_cons(request)
+    
