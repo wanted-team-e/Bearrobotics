@@ -387,14 +387,18 @@ class RestaurantViewset(viewsets.ModelViewSet):
 from rest_framework.decorators import api_view
 
 class GuestViewset(viewsets.ModelViewSet):
+    """
+    editor: 서재환
+    """
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
 
-"""
-    editor: 서재환
-"""
+
 @api_view(['GET'])
 def get_guest(request):
+    """
+    editor: 서재환
+    """
     group_list = Guest.objects.all()
     serializer = GuestSerializer(group_list, many=True)
     return Response(serializer.data)
@@ -402,90 +406,43 @@ def get_guest(request):
 
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
-    restaurants_id_list = []
-    certain_group = []
-
-    requests = commons._request_param(request)    
-    print(f'*****requests***** {requests}{group_name}')
-
     """
-    그룹 이름이 그룹 테이블에 있는지 확인
-    있으면 그룹 아이디 추출
+    editor: 서재환
     """
-    try:
-        group = Group.objects.get(name = group_name)
-        id = group.id
-    except: 
+    q = Q()
+    guests = []
+    queryset = None
+    if group_name and not commons.is_group_name_in_group(group_name):
         return Response({'error_message': '해당 그룹이 없습니다.'})
-    
-    """
-    그룹 이름에 해당하는 아이디가 레스토랑 테이블엥 있는지 확인
-    있으면 레스토랑 아이디 추출 후 제약조건 추가
-    """
-
-    restaurants = Restaurant.objects.filter(group_id=id)
-    if len(restaurants) == 0:
-        return Response({'error_message': '해당 그룹에 해당하는 레스토랑이 없습니다.'})
-    for restaurant in restaurants:
-        restaurants_id_list.append(restaurant.id)
-    restaurants_id_list = set(restaurants_id_list)
-
-    q2 = Q()
-    for id in restaurants_id_list:
-        q2.add(Q(restaurant_id = id), q2.OR)
-
-    """
-    파라미터로 기간을 조회 시 시작과 끝 값이 있거나 없을 때 총 4가지 경우 처리
-    시작과 끝 날짜가 없을 때 그룹이름에 해당하는 POS 데이터가 모두 출력되게 함
-    """
-
-    if requests.get('start_time') == None and requests.get('end_time') == None:
-        certain_group += Guest.objects.filter(q2)
-        if len(certain_group) == 0:
-            return Response({'error_message': '해당 그룹에 해당하는 레스토랑 결제 내역이 없습니다.'})
-        serializer = GuestSerializer(certain_group, many=True)
+    if commons.get_restaurants_id(group_name) == None:
+        return Response({'error_message': '그룹이름에 해당하는 레스토랑이 없습니다.'})
+    if group_name and not commons.is_res_in_pos(group_name):
+        return Response({'error_message': '레스토랑이 POS기에 없습니다.'})      
+    if not isinstance(commons.date_return_cons(request), Q):
+        return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
+    restaurants_id = commons.get_restaurants_id(group_name)
+    for id in restaurants_id:
+        guests += Guest.objects.filter(restaurant_id = id)
+    q = q.add(commons.date_return_cons(request), q.AND)
+    if not request.GET.get('timeunit') and not request.GET.get('start_date') and not request.GET.get('end_date'):
+        serializer = GuestSerializer(guests, many=True)
+        return Response(serializer.data)    
+    if request.GET.get('timeunit') and not commons.is_timeunit(request):
+        return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
+    if commons.is_timeunit(request) and not request.GET.get('timeunit'):
+        guests = GuestSerializer(guests, many=True)
+        return Response(guests.data)
+    if isinstance(commons.date_return_cons(request), Q) and not request.GET.get('timeunit'):
+        q1 = Q()
+        guest = Guest.objects.none()
+        for id in restaurants_id:
+            query_set = Guest.objects.filter(restaurant_id = id)
+            guest |= query_set
+        q &= commons.date_return_cons(request)
+        guests = guest.filter(q).order_by('timestamp')
+        serializer = GuestSerializer(guests, many=True)
         return Response(serializer.data)
-    
-    if requests['start_time'] != None and requests['end_time'] != None:
-        q2.add(Q(timestamp__range=(requests.get('start_time'), requests['end_time'])), q2.AND)
-        q2 &= q2
-    elif not (requests['start_time'] == None and requests['end_time'] == None):
-        if requests['start_time'] == None:
-            q2.add(Q(timestamp = requests['end_time']), q2.AND)
-        elif requests['start_time'] != None:
-            q2.add(Q(timestamp = requests['start_time']), q2.AND)
-        q2 &= q2            
-    
-    guests = Guest.objects.filter(q2).order_by('timestamp')
-
-    """
-    파라미터 timeunit에 대한 처리
-    """
-    timeunit = requests.get('timeunit')
-    print(f'timeunit: {timeunit}')
-    timeunit_list = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
-    if not timeunit and timeunit in timeunit_list:
-        return Response({'error_message': "파라미터 timeunit 값을 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR' 중 하나를 넣어주세요."})
-    if timeunit == 'DAY':
-        guests = Guest.objects.values() \
-            .annotate(day=ExtractDay('timestamp'), total_price = Sum('price'))
-    certain_group += guests
-    serializer = GuestSerializer(certain_group, many=True)
-    return Response(serializer.data)
-
-    # if timeunit and timeunit in timeunit_group:
-    # if timeunit == 'YEAR':
-    #     guests = guests.values('restaurant_id') \
-    #         .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
-    # elif timeunit == 'MONTH':
-    #     guests = guests.values('restaurant_id') \
-    #         .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
-    # elif timeunit == 'WEEK':
-    #     guests = guests.values('restaurant_id') \
-    #         .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
-    # elif timeunit == 'DAY':
-    #     guests = guests.values('restaurant_id') \
-    #         .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
-    # elif timeunit == 'HOUR':
-    #     guests = guests.values('restaurant_id') \
-    #         .annotate(hour=ExtractHour('timestamp'), total_price=Sum('price'))
+    if request.GET.get('timeunit') and commons.is_timeunit(request):
+        guests = Guest.objects.filter(q)
+        queryset = commons.timeunit_return_queryset(request, guests)
+        return Response(queryset)

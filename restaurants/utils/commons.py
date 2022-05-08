@@ -1,10 +1,11 @@
 from datetime import datetime
-from django.db.models import Q
+from django.db.models import Q, Sum
 from rest_framework import status
 
 from rest_framework.response import Response
+from django.core import serializers
 
-from restaurants.models import Guest
+from restaurants.models import Guest, Restaurant, Group
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -115,3 +116,288 @@ def set_swagger():
 
     manual_parameters = [param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8]
     return manual_parameters
+
+
+def is_group_name_in_group(group_name):
+    """
+        작성자 : 서재환
+    """
+    try:
+        group = Group.objects.get(name = group_name)
+    except:
+        return False
+    return True
+
+
+def get_restaurants_id(group_name):
+    """
+        작성자 : 서재환
+    """
+    restaurants = []
+    restaurants_id_list = []
+    group_id = Group.objects.get(name = group_name)
+    restaurants = Restaurant.objects.filter(group_id=group_id)
+    if len(restaurants) == 0:
+        return None
+    for restaurant in restaurants:
+        restaurants_id_list.append(restaurant.id)
+    restaurants_id_list = set(restaurants_id_list)
+    return restaurants_id_list
+
+
+def is_res_in_pos(group_name):
+    """
+    editor: 서재환
+    """
+    restaurants_id_list = get_restaurants_id(group_name)
+    arr = []
+    for id in restaurants_id_list:
+        restaurant = Restaurant.objects.get(id=id)
+        if restaurant:
+            arr.append(restaurant.id)
+    if len(arr) == 0:
+        return False
+    return True
+
+
+def date_return_cons(request):
+    """
+    editor: 서재환
+    """
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    q = Q()
+
+    if start_date == None and end_date == None:
+        return q
+    elif start_date != None and end_date == None:
+        q.add(Q(timestamp = start_date), q.AND)
+    elif start_date == None and end_date != None:
+        q.add(Q(timestamp = end_date), q.AND)
+    elif start_date > end_date:
+        return
+    elif start_date is not None and end_date is not None:
+        q.add(Q(timestamp__range = (start_date, end_date)), q.AND)
+    return q
+
+from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour, TruncDay
+
+
+def is_timeunit(request):
+    """
+    editor: 서재환
+    """
+    timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+    timeunit = request.GET.get('timeunit')
+    if timeunit not in timeunit_group:
+        return False
+    return True
+
+
+def fake_deserializer_year(queryset):
+    """
+    editor: 서재환
+    """
+    res = []
+    price_arr = []
+    timestamp_arr = []
+    price_start = 0
+    if len(queryset) == 0:
+        return []
+    start_year = str(queryset[0]['year'])
+    for date_info in queryset:
+        date = str(date_info['timestamp']).split('-')[0]
+        year = str(date.split('-')[0])
+        price = date_info['total_price']
+        timestamp_arr.append(date)
+        if year == start_year:
+            price_start += price
+        else:
+            price_arr.append(price_start)
+            start_year = year
+            price_start = 0
+            price_start += price
+    if price_start != 0:
+        price_arr.append(price_start)
+    timestamp_arr = sorted(set(timestamp_arr))
+    for i in range(len(timestamp_arr)):
+        res.append({'timestamp': timestamp_arr[i], 'total_price': price_arr[i]})
+    return res
+
+
+def put_zero(str):
+    """
+    editor: 서재환
+    """
+    if len(str) == 1:
+        str = '0' + str
+    return str
+
+
+def fake_desrializer_month(queryset):
+    """
+    editor: 서재환
+    """
+    res = []
+    price_arr = []
+    timestamp_arr = []
+    price_start = 0
+    if len(queryset) == 0:
+        return []
+    start_month = put_zero(str(queryset[0]['month']))
+    for date_info in queryset:
+        date = str(date_info['timestamp']).split(' ')[0]
+        date = date.split('-')[0] + '-' + date.split('-')[1]
+        month = str(date.split('-')[1])
+        price = date_info['total_price']
+        timestamp_arr.append(date)
+        print(month, start_month)
+        if month == start_month:
+            price_start += price
+        else:
+            price_arr.append(price_start)
+            start_month = month
+            price_start = 0
+            price_start += price
+    if price_start != 0:
+        price_arr.append(price_start)
+    timestamp_arr = sorted(set(timestamp_arr))
+    for i in range(len(timestamp_arr)):
+        res.append({'timestamp': timestamp_arr[i], 'total_price': price_arr[i]})
+    return res
+
+
+def fake_deserializer_week(queryset):
+    """
+    editor: 서재환
+    """
+    res = []
+    price_arr = []
+    week_arr = []
+    price_start = 0
+    if len(queryset) == 0:
+        return []
+    start_week = str(queryset[0]['week'])
+    for date_info in queryset:
+        price = date_info['total_price']
+        week = str(date_info['week'])
+        if week == start_week:
+            price_start += price
+        else:
+            price_arr.append(price_start)
+            week_arr.append(start_week)
+            start_week = week
+            price_start = 0
+            price_start += price
+
+    if price_start != 0:
+        price_arr.append(price_start)
+    if start_week  != 0:
+        week_arr.append(start_week)
+    print(week_arr, price_arr)
+    for i in range(len(price_arr)):
+        res.append({'week': week_arr[i], 'total_price': price_arr[i]})
+    return res
+
+
+
+def fake_deserializer_day(queryset):
+    """
+    editor: 서재환
+    """
+    res = []
+    price_arr = []
+    timestamp_arr = []
+    price_start = 0
+    if len(queryset) == 0:
+        return []
+    start_day = str(queryset[0]['day'])
+    for date_info in queryset:
+        date = str(date_info['timestamp']).split(' ')[0]
+        day = str(date.split('-')[2])
+        price = date_info['total_price']
+        timestamp_arr.append(date)
+        if day == start_day:
+            price_start += price
+        else:
+            price_arr.append(price_start)
+            start_day = day
+            price_start = 0
+            price_start += price
+    if price_start != 0:
+        price_arr.append(price_start)
+    timestamp_arr = sorted(set(timestamp_arr))
+    for i in range(len(timestamp_arr)):
+        res.append({'timestamp': timestamp_arr[i], 'total_price': price_arr[i]})
+    return res
+
+
+def fake_deserializer_hour(queryset):
+    """
+    editor: 서재환
+    """
+    res = []
+    price_arr = []
+    timestamp_arr = []
+    price_start = 0
+    if len(queryset) == 0:
+        return []
+    start_hour = str(queryset[0]['hour'])
+    for date_info in queryset:
+        date = str(date_info['timestamp']).split(' ')[0] + ' '
+        hour = str(date_info['timestamp']).split(' ')[1].split(':')[0]
+        date = date + hour
+        price = date_info['total_price']
+        timestamp_arr.append(date)
+        if start_hour == hour:
+            price_start += price
+        else:
+            price_arr.append(price_start)
+            start_hour = hour
+            price_start = 0
+            price_start += price
+    if price_start != 0:
+        price_arr.append(price_start)
+    if start_hour  != 0:
+        timestamp_arr.append(start_hour)
+    timestamp_arr = sorted(set(timestamp_arr))
+    for i in range(len(timestamp_arr)):
+        res.append({'timestamp': timestamp_arr[i], 'total_price': price_arr[i]})
+    return res
+
+
+def timeunit_return_queryset(request, guests):
+    """
+    editor: 서재환
+    """
+    timeunit = request.GET.get('timeunit')
+    timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+    if timeunit:
+        timeunit = timeunit.upper()
+    if timeunit and timeunit in timeunit_group:
+        if timeunit == 'YEAR':
+            guests = guests.values('timestamp') \
+                .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
+            guests = guests.values('timestamp','total_price','year')
+            guests = fake_deserializer_year(guests)        
+        elif timeunit == 'MONTH':
+            guests = guests.values('timestamp') \
+                .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
+            guests = guests.values('timestamp','total_price','month')
+            guests = fake_desrializer_month(guests)
+        elif timeunit == 'WEEK':
+            guests = guests.values('timestamp') \
+                .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
+            guests = guests.values('timestamp','total_price','week')
+            guests = fake_deserializer_week(guests)                
+        elif timeunit == 'DAY':
+            guests = guests.values('timestamp') \
+                .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
+            guests = guests.values('timestamp', 'total_price', 'day')
+            guests = fake_deserializer_day(guests)
+        elif timeunit == 'HOUR':
+            guests = guests.values('timestamp') \
+                .annotate(hour=ExtractHour('timestamp'), total_price=Sum('price'))
+        return guests
+
+    return Response({'error_message': "['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'] 중 하나의 인자 값을 넣으시오"})
