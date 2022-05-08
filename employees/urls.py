@@ -7,5 +7,5 @@ user_router = SimpleRouter(trailing_slash=False)
 user_router.register('users', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('', include(user_router.urls)),
+    path('', include(user_router.urls), name='users'),
 ]
