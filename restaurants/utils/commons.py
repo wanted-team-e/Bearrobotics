@@ -1,13 +1,11 @@
 from datetime import datetime
 from django.db.models import Q
+from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
+from drf_yasg import openapi
 from rest_framework import status
-
 from rest_framework.response import Response
-
 from restaurants.models import Guest
 
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 def _request_param(request):
     """
@@ -32,10 +30,10 @@ def exception_handling(request):
     """
     requests = _request_param(request)
 
-    timeunit = requests.get('timeunit')
-    occurred = False
+    is_error_occurred = False
     error = ''
 
+    # base query 작성
     query = Q(timestamp__range=(requests.get('start_time'), requests.get('end_time')))
 
     if requests.get('min_price') and requests.get('max_price'):
@@ -46,7 +44,6 @@ def exception_handling(request):
         query &= Q(restaurant__group__name=requests.get('group'))
 
     # request 입력값에 대한 예외처리
-
     if requests.get('start_date') and requests.get('end_time'):
         try:
             date_format = "%Y-%m-%d"
@@ -54,32 +51,32 @@ def exception_handling(request):
             datetime.strptime(requests.get('end_time'), date_format)
 
             if requests.get('start_time') > requests.get('end_time'):
-                occurred = True
+                is_error_occurred = True
                 error = Response({'error_message': "조회 시작 날짜보다 끝 날짜가 빠를 수 없습니다."},
                                  status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                                "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                              status=status.HTTP_400_BAD_REQUEST)
 
     if requests.get('min_price') and requests.get('max_price'):
         if not (requests.get('min_price').isdigit() or requests.get('max_price').isdigit()):
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "조회 최소 가격, 최대 가격은 숫자값을 입력해야합니다."},
                              status=status.HTTP_400_BAD_REQUEST)
         if requests.get('min_price') > requests.get('max_price'):
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "조회 최소 가격보다 최대 가격이 클 수 없습니다."},
                              status=status.HTTP_400_BAD_REQUEST)
 
     if requests.get('min_party') and requests.get('max_party'):
         if requests.get('min_party').isdigit() or requests.get('max_party').isdigit():
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "조회 최소 방문자 수, 최대 방문자 수는 숫자값을 입력해야합니다."},
                              status=status.HTTP_400_BAD_REQUEST)
         if requests.get('min_party') > requests.get('max_party'):
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "조회 최소 방문자 수보다 최대 방문자 수가 클 수 없습니다."},
                              status=status.HTTP_400_BAD_REQUEST)
 
@@ -87,17 +84,38 @@ def exception_handling(request):
         group_chk = Guest.objects.filter(query).exists()
 
         if not group_chk:
-            occurred = True
+            is_error_occurred = True
             error = Response({'error_message': "조회 그룹 이름이 존재하지 않습니다."},
                              status=status.HTTP_400_BAD_REQUEST)
 
     result = {
-        'timeunit': timeunit,
+        'timeunit': requests.get('timeunit'),
         'query': query,
-        'occurred': occurred,
+        'is_error_occurred': is_error_occurred,
         'error': error
     }
     return result
+
+
+def set_extract_time(timeunit):
+    """
+        작성자 : 강정희
+    """
+    # timeunit에 따른 annotate 함수 설정
+    timeunit_group = ['year', 'month', 'week', 'day', 'hour']
+
+    extract_time_dict = {
+        'year': ExtractYear('timestamp'),
+        'month': ExtractMonth('timestamp'),
+        'week': ExtractWeek('timestamp'),
+        'day': ExtractDay('timestamp'),
+        'hour': ExtractHour('timestamp'),
+    }
+
+    if timeunit in timeunit_group:
+        return extract_time_dict[timeunit]
+    else:
+        raise Exception
 
 
 def set_swagger():

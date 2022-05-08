@@ -1,5 +1,4 @@
 from django.db.models import Sum, Count, F
-from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -77,38 +76,25 @@ class GuestViewset(viewsets.ModelViewSet):
         """
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
             query = exception_chk.get('query')
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'MONTH':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(hour=ExtractHour('timestamp'), total_price=Sum('price'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'total_price': Sum('price')
+                }
+
+                guests = guests.values('restaurant_id').annotate(**annotate_options)
+                print(guests.query)
 
                 return Response(guests, status=status.HTTP_200_OK)
-            else:
-                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
@@ -126,38 +112,25 @@ class GuestViewset(viewsets.ModelViewSet):
         """
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
             query = exception_chk.get('query')
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(year=ExtractYear('timestamp'), count=Count('payment'))
-                elif timeunit == 'MONTH':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(month=ExtractMonth('timestamp'), count=Count('payment'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(week=ExtractWeek('timestamp'), count=Count('payment'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(day=ExtractDay('timestamp'), count=Count('payment'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(hour=ExtractHour('timestamp'), count=Count('payment'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'restaurant_id': F('restaurant'),
+                    'count': Count('payment')
+                }
+
+                guests = guests.values('payment').annotate(**annotate_options)
 
                 return Response(guests, status=status.HTTP_200_OK)
-            else:
-                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
@@ -165,7 +138,7 @@ class GuestViewset(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description='GET /api/pos/party',
-        operation_summary='Return Fields: (timeunit, resturant_id, number_of_party, count)',
+        operation_summary='Return Fields: (timeunit, restaurant_id, number_of_party, count)',
         manual_parameters=commons.set_swagger()
     )
     @action(detail=False, methods=['get'])
@@ -177,44 +150,25 @@ class GuestViewset(viewsets.ModelViewSet):
 
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
-
             query = exception_chk.get('query')
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    guests = guests.values('number_of_party') \
-                        .annotate(year=ExtractYear('timestamp'), restaurant_id=F('restaurant'),
-                                  count=Count('number_of_party'))
-                elif timeunit == 'MONTH':
-                    guests = guests.values('number_of_party') \
-                        .annotate(month=ExtractMonth('timestamp'), restaurant_id=F('restaurant'),
-                                  count=Count('number_of_party'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('number_of_party') \
-                        .annotate(week=ExtractWeek('timestamp'), restaurant_id=F('restaurant'),
-                                  count=Count('number_of_party'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('number_of_party') \
-                        .annotate(day=ExtractDay('timestamp'), restaurant_id=F('restaurant'),
-                                  count=Count('number_of_party'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('number_of_party') \
-                        .annotate(hour=ExtractHour('timestamp'), restaurant_id=F('restaurant'),
-                                  count=Count('number_of_party'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'restaurant_id': F('restaurant'),
+                    'count': Count('number_of_party')
+                }
+
+                guests = guests.values('number_of_party').annotate(**annotate_options)
 
                 return Response(guests, status=status.HTTP_200_OK)
-            else:
-                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
