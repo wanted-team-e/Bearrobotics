@@ -30,10 +30,10 @@ def client():
 
 
 @pytest.fixture()
-def gen_token(client):
+def headers(client):
     url = 'http://127.0.0.1:8000/api/users/signup'
     u_data = {'email':'kid@gmail.com', 'password':'Pqweasd31!','username':'dstranger'}
     request = client.post(path=url, data=u_data)
-    token = request.data['access_token']
-    token = '{Authorization: Bearer ' + f'"{token}"' + '}'
-    return token
+    headers = request.data['access_token']
+    headers = {'HTTP_Authorization': f'Bearer "{headers}"'}
+    return headers
