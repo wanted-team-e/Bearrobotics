@@ -56,5 +56,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'email',
             'username',
             'rank_type',
-            'group',
+        )
+        read_only_fields = (
+            'email',
         )

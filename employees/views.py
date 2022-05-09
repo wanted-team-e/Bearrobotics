@@ -18,10 +18,10 @@ class UserViewSet(mixins.RetrieveModelMixin,
 
     def get_permissions(self):
         permission_classes = []
-        if self.action in ['signup', 'login', 'retrieve', 'list']:
-            permission_classes = [AllowAny]
+        if self.action in ('signup', 'login', 'retrieve', 'list'):
+            permission_classes = (AllowAny, )
         else:
-            permission_classes = [EmployeePermission]
+            permission_classes = (EmployeePermission, )
         return [permission() for permission in permission_classes]
 
 

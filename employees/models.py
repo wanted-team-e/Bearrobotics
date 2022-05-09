@@ -45,7 +45,6 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=31, blank=True, default='')
 
     class RankType(models.TextChoices):
-        Super = 'SUPER'
         Confirm = 'CONFIRM'
         Normal = 'NORMAL'
 
@@ -54,7 +53,6 @@ class Employee(AbstractBaseUser, PermissionsMixin):
         choices=RankType.choices,
         default=RankType.Normal
     )
-    group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE, null=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
