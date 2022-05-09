@@ -1,8 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from restaurants.views.restaurantView import RestaurantViewset, get_guest
+from restaurants.views.restaurantView import RestaurantViewset, get_guest, get_certain_group_list, get_city_list
 from restaurants.views.guestView import GuestViewset
+
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r'restaurant', RestaurantViewset, basename='restaurants')
@@ -10,5 +11,10 @@ router.register(r'pos', GuestViewset, basename='restaurants')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('group/', get_guest),
+]
+
+urlpatterns += [
+    path('group/', get_guest,),
+    path('group/<str:group_name>/', get_certain_group_list),
+    path('address/<str:city_name>', get_city_list),
 ]

@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from restaurants.models import Guest
+
 from restaurants.permissions import RestaurantPermission, GuestInfoPermission
-from restaurants.serializers import GuestCUDSerializer, GuestRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer
+from restaurants.serializers import GuestRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer
 
 from restaurants.utils import commons
 

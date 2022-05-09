@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from restaurants.models import Restaurant, Guest
+from restaurants.models import Restaurant, Guest, Group
 
 
 class RestaurantCUDSerializer(serializers.ModelSerializer):
@@ -83,21 +83,6 @@ class PartyDocsSerializer(serializers.ModelSerializer):
         )
 
 
-class GuestCUDSerializer(serializers.ModelSerializer):
-    """
-        작성자 : 서재환
-    """
-    class Meta:
-        model = Guest
-        fields = (
-            'restaurant',
-            'price',
-            'number_of_party',
-            'timestamp',
-            'payment'
-        )
-
-
 class GuestRSerializer(serializers.ModelSerializer):
     """
         작성자 : 강정희
@@ -113,3 +98,32 @@ class GuestRSerializer(serializers.ModelSerializer):
             'timestamp',
             'payment'
         )
+
+
+class GuestSerializer(serializers.ModelSerializer):
+    """
+        작성자 : 서재환
+    """
+    class Meta:
+        model = Guest
+        fields = (
+            'restaurant',
+            'price',
+            'number_of_party',
+            'timestamp',
+            'payment'
+        )
+
+        read_only_fields = (
+            'group',
+        )
+
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    """
+        editor : 서재환
+    """
+    class Meta:
+        model = Group
+        fields = '__all__'

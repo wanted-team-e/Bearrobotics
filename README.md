@@ -160,11 +160,22 @@ POS 정보 중 레스토랑, 결제 방식별 결제 수 조회 : GET /api/pos/p
 - pk 값에 해당하는 사용자 정보를 삭제합니다.
 
 
-#### bonus
+#### BONUS PART
 POS 정보 중 기간별 총 매출 조회 : GET /api/group/total_price?start_time=YYYY-mm-dd 00:00:00&end_time=YYYY-mm-dd 00:00:00&timeunit=...  
 - 총 매출 정보를 파라미터로 넘어온 기간에 따라 필터링하여 조회합니다.
-  
-  
+
+그룹과 관련한 모든 POS조회 : GET /api/group/
+- 그룹 상관없이 전체 그룹과 관련된 POS 정보를 조회합니다.
+
+그룹이름 조회 : GET /api/group/검색할그룹이름
+- 그룹이름이 그룹에 있는지 조회하고 POS에 그룹에 속한 레스토랑이 있는지 조회합니다.
+
+그룹 별 기간별 POS의 총 정보를 조회: GET /api/group/그룹이름/?start_date=YYYY-mm-dd 00:00:00&end_date=YYYY-mm-dd 00:00:00
+- 특정 그룹에 속한 레스토랑의 특정 기간 동안의 결제 정보를 조회합니다.
+
+그룹 별 기간별 POS의 총 정보를 시간단위를 고려하여 조회: GET /api/group/total_price?start_time=YYYY-mm-dd 00:00:00&end_time=YYYY-mm-dd 00:00:00&timeunit=...  
+- 특정 그룹에 속한 레스토랑이 특정기간 동안의 매출현황을 시간/일/주/달/연 단위로 그룹핑하여 결제 정보를 조회합니다.
+
 메뉴 생성 : POST /api/menu
 - 이름, 가격, 그룹의 정보를 입력받아 메뉴를 생성합니다.
 
