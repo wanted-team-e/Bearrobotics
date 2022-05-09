@@ -22,7 +22,6 @@ class JsonWebTokenMiddleWare(object):
 
                 headers = request.headers
                 access_token = headers.get("Authorization", None)
-                print(access_token)
                 if not access_token:
                     raise PermissionDenied()
 
