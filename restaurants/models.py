@@ -10,6 +10,9 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=256, null=False, blank=False)
     group = models.ForeignKey('restaurants.Group', on_delete=models.CASCADE)
 
+    class Meta:
+        app_label = 'restaurants'
+
     def __str__(self):
         return self.name
 
@@ -33,13 +36,17 @@ class Guest(models.Model):
         max_length=20,
         choices=PaymentType.choices
     )
-
+    class Meta:
+        app_label = 'restaurants'
 
 class Group(models.Model):
     """
         작성자 : 강정희
     """
     name = models.CharField(max_length=128, null=False, blank=False)
+
+    class Meta:
+        app_label = 'restaurants'
 
     def __str__(self):
         return self.name
@@ -54,6 +61,9 @@ class Menu(models.Model):
     price = models.PositiveIntegerField()
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
+
+    class Meta:
+        app_label = 'restaurants'
 
     def __str__(self):
         return self.name
