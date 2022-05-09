@@ -11,7 +11,6 @@ from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializ
     TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer
 
 from restaurants.utils import commons
-from restaurants.utils.commons import *
 
 
 class RestaurantViewset(viewsets.ModelViewSet):
@@ -190,12 +189,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class GuestViewset(viewsets.ModelViewSet):
-    """
-    editor: 서재환
-    """
-    queryset = Guest.objects.all()
-    serializer_class = GuestCUDSerializer
+from restaurants.utils.commons import *
 
 
 @api_view(['GET'])
@@ -211,7 +205,7 @@ def get_guest(self):
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     q = Q()
     guests = []
@@ -249,12 +243,13 @@ def get_certain_group_list(request, group_name):
 @api_view(['GET'])
 def get_city_list(request, city_name):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     q = Q()
-    if not commons.is_city_exsist:
+    restaurant_id_list = []
+    if not is_city_exsist:
         return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
-    if commons.is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
+    if is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
         queryset = Restaurant.objects.filter(address__contains=city_name)
         for restaurant in queryset:
             restaurant_id_list.append(restaurant.id)
@@ -268,7 +263,7 @@ def get_city_list(request, city_name):
         guests = GuestCUDSerializer(guests, many=True)
         return Response(guests.data)
     restaurant_id_list = get_restaurants_id_address(city_name)
-    if not isinstance(commons.date_return_cons(request), Q):
+    if not isinstance(date_return_cons(request), Q):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
     if request.GET.get('timeunit') and not is_timeunit(request):
         return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
