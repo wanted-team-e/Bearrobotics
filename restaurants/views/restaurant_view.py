@@ -1,17 +1,17 @@
 from django.db.models import Q, Sum, Count, F
-from django.db.models.functions import ExtractYear, ExtractMonth, ExtractWeek, ExtractDay, ExtractHour
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from restaurants.models import Restaurant, Guest, Group
+from restaurants.models import Restaurant, Guest
 from restaurants.permissions import RestaurantPermission
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer
-from restaurants.serializers import GuestSerializer
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, \
+    TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer
 
 from restaurants.utils import commons
+from restaurants.utils.commons import *
 
 
 class RestaurantViewset(viewsets.ModelViewSet):
@@ -81,39 +81,29 @@ class RestaurantViewset(viewsets.ModelViewSet):
         manual_parameters=commons.set_swagger()
     )
     @action(detail=True, methods=['get'])
-    def total_price_restaurant(self, request, pk):
+    def total_price(self, request, pk):
         """
             작성자 : 강정희
         """
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
             query = exception_chk.get('query') & Q(restaurant__id=pk)
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    guests = guests.values('restaurant_id')\
-                        .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'MONTH':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('restaurant_id') \
-                        .annotate(hour=ExtractHour('timestamp'), total_price=Sum('price'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'total_price': Sum('price')
+                }
+
+                guests = guests.values('restaurant_id').annotate(**annotate_options)
+                print(guests.query)
 
                 return Response(guests, status=status.HTTP_200_OK)
             else:
@@ -130,62 +120,43 @@ class RestaurantViewset(viewsets.ModelViewSet):
         manual_parameters=commons.set_swagger()
     )
     @action(detail=True, methods=['get'])
-    def payment_restaurant(self, request, pk):
+    def payment(self, request, pk):
         """
             작성자 : 강정희
         """
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
-            print('try진입')
             query = exception_chk.get('query') & Q(restaurant__id=pk)
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    print('year진입')
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(year=ExtractYear('timestamp'), count=Count('payment'))
-                    print(guests.query)
-                elif timeunit == 'MONTH':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(month=ExtractMonth('timestamp'), count=Count('payment'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(week=ExtractWeek('timestamp'), count=Count('payment'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(day=ExtractDay('timestamp'), count=Count('payment'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('restaurant_id', 'payment') \
-                        .annotate(hour=ExtractHour('timestamp'), count=Count('payment'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'restaurant_id': F('restaurant'),
+                    'count': Count('payment')
+                }
+
+                guests = guests.values('payment').annotate(**annotate_options)
 
                 return Response(guests, status=status.HTTP_200_OK)
-            else:
-                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
-
-
 
     @swagger_auto_schema(
         operation_description='GET /api/restaurant/:pk/party',
-        operation_summary='Return Fields: (timeunit, resturant_id, number_of_party, count)',
+        operation_summary='Return Fields: (timeunit, restaurant_id, number_of_party, count)',
         manual_parameters=commons.set_swagger()
-        )
+    )
     @action(detail=True, methods=['get'])
-    def party_restaurant(self, request, pk):
+    def party(self, request, pk):
 
         """
             작성자: 김채욱
@@ -193,48 +164,30 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
         exception_chk = commons.exception_handling(request)
 
-        if exception_chk.get('occurred'):
+        if exception_chk.get('is_error_occurred'):
             return exception_chk.get('error')
 
         try:
 
             query = exception_chk.get('query') & Q(restaurant__id=pk)
-
             guests = Guest.objects.filter(query)
 
-            timeunit = exception_chk.get('timeunit').upper()
-            timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
+            timeunit = exception_chk.get('timeunit').lower()
 
-            if timeunit and timeunit in timeunit_group:
-                if timeunit == 'YEAR':
-                    guests = guests.values('number_of_party') \
-                        .annotate(year=ExtractYear('timestamp'), count=Count('number_of_party'))
+            if timeunit:
+                annotate_options = {
+                    timeunit.lower(): commons.set_extract_time(timeunit),
+                    'restaurant_id': F('restaurant'),
+                    'count': Count('number_of_party')
+                }
 
-                elif timeunit == 'MONTH':
-                    guests = guests.values('number_of_party') \
-                        .annotate(month=ExtractMonth('timestamp'), count=Count('number_of_party'))
-                elif timeunit == 'WEEK':
-                    guests = guests.values('number_of_party') \
-                        .annotate(week=ExtractWeek('timestamp'), count=Count('number_of_party'))
-                elif timeunit == 'DAY':
-                    guests = guests.values('number_of_party') \
-                        .annotate(day=ExtractDay('timestamp'), count=Count('number_of_party'))
-                elif timeunit == 'HOUR':
-                    guests = guests.values('number_of_party') \
-                        .annotate(hour=ExtractHour('timestamp'), count=Count('number_of_party'))
+                guests = guests.values('number_of_party').annotate(**annotate_options)
 
                 return Response(guests, status=status.HTTP_200_OK)
-            else:
-                return Response({'error_message': "시간 단위는 &timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
-                                status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
-
-
-from rest_framework.decorators import api_view
-from restaurants.utils.commons import *
 
 
 class GuestViewset(viewsets.ModelViewSet):
@@ -242,7 +195,7 @@ class GuestViewset(viewsets.ModelViewSet):
     editor: 서재환
     """
     queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
+    serializer_class = GuestCUDSerializer
 
 
 @api_view(['GET'])
@@ -251,7 +204,7 @@ def get_guest(self):
         작성자 : 서재환
     """
     group_list = Guest.objects.all()
-    serializer = GuestSerializer(group_list, many=True)
+    serializer = GuestCUDSerializer(group_list, many=True)
     return Response(serializer.data)
 
 
@@ -267,7 +220,7 @@ def get_certain_group_list(request, group_name):
     if get_restaurants_id(group_name) == None:
         return Response({'error_message': '그룹이름에 해당하는 레스토랑이 없습니다.'})
     if group_name and not is_res_in_pos(group_name):
-        return Response({'error_message': '레스토랑이 POS기에 없습니다.'})      
+        return Response({'error_message': '레스토랑이 POS기에 없습니다.'})
     if not isinstance(date_return_cons(request), Q):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
     restaurants_id = get_restaurants_id(group_name)
@@ -275,8 +228,8 @@ def get_certain_group_list(request, group_name):
         guests += Guest.objects.filter(restaurant_id = id)
     q = q.add(date_return_cons(request), q.AND)
     if not request.GET.get('timeunit') and not request.GET.get('start_date') and not request.GET.get('end_date'):
-        serializer = GuestSerializer(guests, many=True)
-        return Response(serializer.data)    
+        serializer = GuestCUDSerializer(guests, many=True)
+        return Response(serializer.data)
     if request.GET.get('timeunit') and not is_timeunit(request):
         return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
     if isinstance(date_return_cons(request), Q) and not request.GET.get('timeunit'):
@@ -285,7 +238,7 @@ def get_certain_group_list(request, group_name):
             query_set = Guest.objects.filter(restaurant_id = id)
             guest |= query_set
         guests = guest.filter(q).order_by('timestamp')
-        serializer = GuestSerializer(guests, many=True)
+        serializer = GuestCUDSerializer(guests, many=True)
         return Response(serializer.data)
     if request.GET.get('timeunit') and is_timeunit(request):
         guests = Guest.objects.filter(q)
@@ -312,7 +265,7 @@ def get_city_list(request, city_name):
         guests = guests.order_by('timestamp')
         if len(guests) == 0:
             return Response({'error_message': 'pos에 해당 도시에 있는 레스토랑이 없습니다.'})
-        guests = GuestSerializer(guests, many=True)
+        guests = GuestCUDSerializer(guests, many=True)
         return Response(guests.data)
     restaurant_id_list = get_restaurants_id_address(city_name)
     if not isinstance(commons.date_return_cons(request), Q):
@@ -326,8 +279,8 @@ def get_city_list(request, city_name):
             query_set = Guest.objects.filter(restaurant_id = id)
             guest |= query_set
         guests = guest.filter(q).order_by('timestamp')
-        serializer = GuestSerializer(guests, many=True)   
-        return Response(serializer.data)     
+        serializer = GuestCUDSerializer(guests, many=True)
+        return Response(serializer.data)
     if request.GET.get('timeunit') and is_timeunit(request):
         q &= date_return_cons(request)
         guest = Guest.objects.none()
@@ -337,4 +290,3 @@ def get_city_list(request, city_name):
         guests = guest.filter(q).order_by('timestamp')
         queryset = timeunit_return_queryset(request, guests)
         return Response(queryset)
-
