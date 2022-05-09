@@ -160,7 +160,7 @@ POS 정보 중 레스토랑, 결제 방식별 결제 수 조회 : GET /api/pos/p
 
 
 #### BONUS PART
-**그룹 정보(Group)**
+> **그룹 정보(Group)**
 
 그룹과 관련한 모든 POS조회 : GET /api/group/
 - 그룹 상관없이 전체 그룹과 관련된 POS 정보를 조회합니다.
