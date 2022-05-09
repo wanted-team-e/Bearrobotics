@@ -59,7 +59,7 @@
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=Python&logoColor=white"/> <img src="https://img.shields.io/badge/Django-092E20?style=flat-square&logo=Django&logoColor=white"/> <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=SQLite&logoColor=white"/> <img src="https://img.shields.io/badge/PyCharm-000000?style=flat-square&logo=PyCharm&logoColor=white"/> <img src="https://img.shields.io/badge/VSCode-007ACC?style=flat-square&logo=Visual Studio Code&logoColor=white"/> <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/> <img src="https://img.shields.io/badge/AWS EC2-232F3E?style=flat-square&logo=Amazon AWS&logoColor=white"/>
 
 ### 개발 기간
-- 2022.05.02 - 2022.05.06
+- 2022.05.02 - 2022.05.09
 
 > ### ERD
 <img src="./source/bearrobotics_erd.png" alt="erd"/>
@@ -142,12 +142,3 @@ $ python manage.py runserver
    - 찾으려는 주소가 있는지 조회하고 있을 경우 특정기간에 한해서 주소에 해당하는 레스토랑이 POS 있는지 조회
    - 특정기간 동안 찾으려는 주소에 POS 정보를 시간, 일, 주, 달, 연 중 하나로 그룹핑하여 POS 정보를 조회합니다.
 
----
-### 주의사항
-jwt 인증 관련 testcode가 과제 기간 내에 구현이 안되었기 때문에
-
->base.py의 
-> 'employees.authentications.JSONWebTokenAuthentication'
-> 'employees.middleware.JsonWebTokenMiddleWare',
-
-주석처리후 테스트 부탁드립니다.
