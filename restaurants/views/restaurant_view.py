@@ -192,6 +192,12 @@ class RestaurantViewset(viewsets.ModelViewSet):
 from restaurants.utils.commons import *
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/pos/',
+    operation_summary='Return Fields: (restaurant_name, price, number_of_party, timestamp, payment)',
+)
+
 @api_view(['GET'])
 def get_guest(self):
     """
@@ -201,6 +207,12 @@ def get_guest(self):
     serializer = GuestCUDSerializer(group_list, many=True)
     return Response(serializer.data)
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/group/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
 
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
@@ -239,6 +251,12 @@ def get_certain_group_list(request, group_name):
         queryset = timeunit_return_queryset(request, guests)
         return Response(queryset)
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/address/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
 
 @api_view(['GET'])
 def get_city_list(request, city_name):
