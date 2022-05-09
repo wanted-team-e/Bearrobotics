@@ -160,7 +160,7 @@ POS 정보 중 레스토랑, 결제 방식별 결제 수 조회 : GET /api/pos/p
 - pk 값에 해당하는 사용자 정보를 삭제합니다.
 
 
-#### bonus
+#### BONUS PART
 POS 정보 중 기간별 총 매출 조회 : GET /api/group/total_price?start_time=YYYY-mm-dd 00:00:00&end_time=YYYY-mm-dd 00:00:00&timeunit=...  
 - 총 매출 정보를 파라미터로 넘어온 기간에 따라 필터링하여 조회합니다.
 
