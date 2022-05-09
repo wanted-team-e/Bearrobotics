@@ -12,7 +12,7 @@ post_data = {'name':'비비고', 'city':'서울', 'address':'관악구 서울대
 
 
 def test_list(client, gen_token):
-    token= gen_token()
+    token= gen_token
     print(token)
     response = client.get(path=base_url,headers=token)
     print(json.loads(response.content))
