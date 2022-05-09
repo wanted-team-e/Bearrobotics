@@ -6,6 +6,7 @@ from django.core.management import call_command
 from restaurants.tests.factories import GroupFactory, RestaurantFactory, GuestFactory, MenuFactory
 from pytest_factoryboy import register
 
+
 """
     작성자 : 김채욱
 """
@@ -25,4 +26,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 @pytest.fixture()
 def client():
-    return APIClient
+    return APIClient()
+
+
+
