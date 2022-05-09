@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 from employees.models import Employee
@@ -16,13 +15,14 @@ class UserSignupSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
     def create(self, validated_data):
         email = validated_data['email']
         username = validated_data['username']
         password = validated_data['password']
         user = Employee.objects.create_user(
-            email = email,
-            username = username,
+            email=email,
+            username=username,
             password=password
         )
         user.save()
@@ -40,13 +40,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
     def validate(self, data):
-        email = data.get('email',None)
+        email = data.get('email', None)
         user = Employee.objects.filter(email=email).first()
         if user is None:
             return None
         return user
-
 
 
 class EmployeeSerializer(serializers.ModelSerializer):

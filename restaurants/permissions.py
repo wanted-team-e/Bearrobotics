@@ -21,6 +21,7 @@ class RestaurantPermission(permissions.BasePermission):
         else:
             return False
 
+
 class GuestInfoPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):

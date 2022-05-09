@@ -1,20 +1,18 @@
-import pytest, json  
+import pytest, json
 
 from django.urls import reverse
 
 pytestmark = pytest.mark.django_db
 
-base_url = reverse('restaurants-list') # api/restaurant
+base_url = reverse('restaurants-list')  # api/restaurant
 
-
-post_data = {'name':'비비고', 'city':'서울', 'address':'관악구 서울대입구', 'group':'1'}
-
+post_data = {'name': '비비고', 'city': '서울', 'address': '관악구 서울대입구', 'group': '1'}
 
 
 def test_list(client, gen_token):
-    token= gen_token()
+    token = gen_token
     print(token)
-    response = client.get(path=base_url,headers=token)
+    response = client.get(path=base_url, headers=token)
     print(json.loads(response.content))
     assert response.status_code == 200
 
@@ -27,21 +25,21 @@ def test_create(client):
 
 
 def test_retrieve_detail(client):
-    detail_url = reverse('restaurants-detail', kwargs={'pk':'21'})
+    detail_url = reverse('restaurants-detail', kwargs={'pk': '21'})
     response = client.get(detail_url)
     assert response.status_code == 200
     assert json.loads(response.content) == {'name': '비비고', 'city': '서울', 'address': '서초구 서초동', 'group_name': '그룹1'}
 
 
 def test_put_detail(client):
-    detail_url = reverse('restaurants-detail', kwargs={'pk':'21'})
+    detail_url = reverse('restaurants-detail', kwargs={'pk': '21'})
     response = client.put(path=detail_url, data={'name': '비비빅', 'city': '부산', 'address': '서초구 서초동', 'group': 1})
     assert response.status_code == 200
     assert json.loads(response.content) == {'name': '비비빅', 'city': '부산', 'address': '서초구 서초동', 'group': 1}
 
 
 def test_delete_detail(client):
-    detail_url = reverse('restaurants-detail', kwargs={'pk':'21'})
+    detail_url = reverse('restaurants-detail', kwargs={'pk': '21'})
     response1 = client.delete(detail_url)
     response2 = client.get(detail_url)
     assert response1.status_code == 204
@@ -82,6 +80,7 @@ def test_list_group(client):
     response = client.get(path='http://127.0.0.1:8000/api/group')
     print(json.loads(response.content))
     assert response.status_code == 200
+
 
 def test_retrieve_name(client):
     response = client.get('http://127.0.0.1:8000/api/group/서울')

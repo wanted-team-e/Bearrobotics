@@ -1,10 +1,10 @@
 from jwt import ExpiredSignatureError
 from rest_framework import status
-from rest_framework.permissions import SAFE_METHODS
 from .models import Employee
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from .jwt import decode_jwt
+
 
 class JsonWebTokenMiddleWare(object):
 
@@ -14,10 +14,10 @@ class JsonWebTokenMiddleWare(object):
     def __call__(self, request):
         try:
             if (
-                request.path != "/api/users/signup"
-                and request.path != "/api/users/login"
-                and "admin" not in request.path
-                and "swagger" not in request.path
+                    request.path != "/api/users/signup"
+                    and request.path != "/api/users/login"
+                    and "admin" not in request.path
+                    and "swagger" not in request.path
             ):
 
                 headers = request.headers

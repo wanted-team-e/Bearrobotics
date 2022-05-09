@@ -24,7 +24,7 @@ schema_view = get_schema_view(
         default_version='v1',
         description=
         """
-        베어로보틱스 기업과제 api명세서 페이지입니다.
+        베어로보틱스 기업과제 api 명세서 페이지입니다.
         """,
     ),
     validators=['flex'],

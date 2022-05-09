@@ -1,18 +1,16 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets, mixins
+from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
 from restaurants.models import Menu
 from restaurants.serializers import MenuSerializer
-from restaurants.views import RestaurantViewset
 
 
 class MenuViewSet(mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   GenericViewSet):
-
+                  mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  GenericViewSet):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
 

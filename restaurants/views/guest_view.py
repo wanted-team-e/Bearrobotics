@@ -13,7 +13,7 @@ from restaurants.serializers import GuestCUDSerializer, GuestRSerializer, \
 from restaurants.utils import commons
 
 
-class GuestViewset(viewsets.ModelViewSet):
+class GuestViewSet(viewsets.ModelViewSet):
     """
         작성자 : 서재환
     """
