@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from restaurants.models import Guest
-from restaurants.permissions import RestaurantPermission
+
+from restaurants.permissions import RestaurantPermission, GuestInfoPermission
 from restaurants.serializers import GuestRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer
 
 from restaurants.utils import commons
@@ -18,15 +19,7 @@ class GuestViewset(viewsets.ModelViewSet):
         작성자 : 서재환
     """
     queryset = Guest.objects.all()
-
-
-    def get_permissions(self):
-        permission_classes = []
-        if self.action in ['list', 'retrieve']:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [RestaurantPermission]
-        return [permission() for permission in permission_classes]
+    permission_classes = [GuestInfoPermission,]
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':

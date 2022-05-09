@@ -4,23 +4,39 @@ from rest_framework import permissions
 class RestaurantPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated
+        if request.user.is_authenticated:
+            if request.user.rank_type == 'CONFIRM':
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def has_object_permission(self, request, view, obj):
-        if request.user.rank_type == 'CONFIRM':
-            return True
+        if request.user.is_authenticated:
+            if request.user.rank_type == 'CONFIRM':
+                return True
+            else:
+                return False
         else:
-            return obj.group.id == request.user.group.id
-        return False
+            return False
 
 class GuestInfoPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated
+        if request.user.is_authenticated:
+            if request.user.rank_type == 'CONFIRM':
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def has_object_permission(self, request, view, obj):
-        if request.user.rank_type == 'CONFIRM':
-            return True
+        if request.user.is_authenticated:
+            if request.user.rank_type == 'CONFIRM':
+                return True
+            else:
+                return False
         else:
-            return obj.restaurant.group.id == request.user.group.id
-        return False
+            return False
