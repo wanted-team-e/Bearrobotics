@@ -255,7 +255,6 @@ def get_guest(self):
     return Response(serializer.data)
 
 
-
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
     """
