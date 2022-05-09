@@ -234,6 +234,8 @@ class RestaurantViewset(viewsets.ModelViewSet):
 
 
 from rest_framework.decorators import api_view
+from restaurants.utils.commons import *
+
 
 class GuestViewset(viewsets.ModelViewSet):
     """
@@ -261,39 +263,34 @@ def get_certain_group_list(request, group_name):
     """
     q = Q()
     guests = []
-    if group_name and not commons.is_group_name_in_group(group_name):
+    if group_name and not is_group_name_in_group(group_name):
         return Response({'error_message': '해당 그룹이 없습니다.'})
-    if commons.get_restaurants_id(group_name) == None:
+    if get_restaurants_id(group_name) == None:
         return Response({'error_message': '그룹이름에 해당하는 레스토랑이 없습니다.'})
-    if group_name and not commons.is_res_in_pos(group_name):
+    if group_name and not is_res_in_pos(group_name):
         return Response({'error_message': '레스토랑이 POS기에 없습니다.'})      
-    if not isinstance(commons.date_return_cons(request), Q):
+    if not isinstance(date_return_cons(request), Q):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
-    restaurants_id = commons.get_restaurants_id(group_name)
+    restaurants_id = get_restaurants_id(group_name)
     for id in restaurants_id:
         guests += Guest.objects.filter(restaurant_id = id)
-    q = q.add(commons.date_return_cons(request), q.AND)
+    q = q.add(date_return_cons(request), q.AND)
     if not request.GET.get('timeunit') and not request.GET.get('start_date') and not request.GET.get('end_date'):
         serializer = GuestSerializer(guests, many=True)
         return Response(serializer.data)    
-    if request.GET.get('timeunit') and not commons.is_timeunit(request):
+    if request.GET.get('timeunit') and not is_timeunit(request):
         return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
-    if commons.is_timeunit(request) and not request.GET.get('timeunit'):
-        guests = GuestSerializer(guests, many=True)
-        return Response(guests.data)
-    if isinstance(commons.date_return_cons(request), Q) and not request.GET.get('timeunit'):
-        q1 = Q()
+    if isinstance(date_return_cons(request), Q) and not request.GET.get('timeunit'):
         guest = Guest.objects.none()
         for id in restaurants_id:
             query_set = Guest.objects.filter(restaurant_id = id)
             guest |= query_set
-        q &= commons.date_return_cons(request)
         guests = guest.filter(q).order_by('timestamp')
         serializer = GuestSerializer(guests, many=True)
         return Response(serializer.data)
-    if request.GET.get('timeunit') and commons.is_timeunit(request):
+    if request.GET.get('timeunit') and is_timeunit(request):
         guests = Guest.objects.filter(q)
-        queryset = commons.timeunit_return_queryset(request, guests)
+        queryset = timeunit_return_queryset(request, guests)
         return Response(queryset)
 
 
@@ -303,7 +300,6 @@ def get_city_list(request, city_name):
     editor: 서재환
     """
     q = Q()
-    restaurant_id_list = []
     if not commons.is_city_exsist:
         return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
     if commons.is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
@@ -319,10 +315,27 @@ def get_city_list(request, city_name):
             return Response({'error_message': 'pos에 해당 도시에 있는 레스토랑이 없습니다.'})
         guests = GuestSerializer(guests, many=True)
         return Response(guests.data)
+    restaurant_id_list = get_restaurants_id_address(city_name)
     if not isinstance(commons.date_return_cons(request), Q):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
-    q &= commons.date_return_cons(request)
-    
-    serializer = GuestSerializer(guests, many=True)
-    return Response(serializer.data)
+    if request.GET.get('timeunit') and not is_timeunit(request):
+        return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
+    if isinstance(date_return_cons(request), Q) and not request.GET.get('timeunit'):
+        q &= date_return_cons(request)
+        guest = Guest.objects.none()
+        for id in restaurant_id_list:
+            query_set = Guest.objects.filter(restaurant_id = id)
+            guest |= query_set
+        guests = guest.filter(q).order_by('timestamp')
+        serializer = GuestSerializer(guests, many=True)   
+        return Response(serializer.data)     
+    if request.GET.get('timeunit') and is_timeunit(request):
+        q &= date_return_cons(request)
+        guest = Guest.objects.none()
+        for id in restaurant_id_list:
+            query_set = Guest.objects.filter(restaurant_id = id)
+            guest |= query_set
+        guests = guest.filter(q).order_by('timestamp')
+        queryset = timeunit_return_queryset(request, guests)
+        return Response(queryset)
 

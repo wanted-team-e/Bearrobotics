@@ -31,7 +31,7 @@ class GuestViewset(viewsets.ModelViewSet):
         elif self.action == 'party':
             return PartyDocsSerializer
         else:
-            return GuestCUDSerializer
+            # return GuestCUDSerializer
 
     @swagger_auto_schema(
         operation_description='POST /api/pos',
