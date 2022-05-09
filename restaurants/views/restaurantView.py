@@ -7,12 +7,8 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from restaurants.models import Restaurant, Guest, Group
-<<<<<<< HEAD:restaurants/views.py
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
-=======
 from restaurants.permissions import RestaurantPermission
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer
->>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer, GuestSerializer
 
 from restaurants.utils import commons
 
@@ -236,7 +232,6 @@ class RestaurantViewset(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-<<<<<<< HEAD:restaurants/views.py
 from rest_framework.decorators import api_view
 
 class GuestViewset(viewsets.ModelViewSet):
@@ -248,39 +243,15 @@ class GuestViewset(viewsets.ModelViewSet):
 
 
 @api_view(['GET'])
-def get_guest(request):
-    """
-    editor: 서재환
-=======
-@api_view(['GET'])
 def get_guest(self):
     """
         작성자 : 서재환
->>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
     """
     group_list = Guest.objects.all()
     serializer = GuestCUDSerializer(group_list, many=True)
     return Response(serializer.data)
 
-<<<<<<< HEAD:restaurants/views.py
-=======
 
-@api_view(['GET'])
-def get_certain_group_list(self, request):
-    """
-        작성자 : 서재환
-    """
-    restaurants_id_list = []
-    group_name = request.GET.get('group_name', False)
-
-    if not group_name:
-        return Response({'error_message': '인자 값으로 그룹 이름을 넣어주세요.'}, stats=status.HTTP_400_BAD_REQUEST)
-    
-    groups = Group.objects.all().filter(name=group_name)
-
-    if len(groups) == 0:
-        return Response({'error_message': '해당 그룹이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
->>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
 
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
@@ -324,7 +295,6 @@ def get_certain_group_list(request, group_name):
         queryset = commons.timeunit_return_queryset(request, guests)
         return Response(queryset)
 
-<<<<<<< HEAD:restaurants/views.py
 
 @api_view(['GET'])
 def get_city_list(request, city_name):
@@ -352,7 +322,6 @@ def get_city_list(request, city_name):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
     q &= commons.date_return_cons(request)
     
-=======
-    serializer = GuestCUDSerializer(certain_group, many=True)
+    serializer = GuestSerializer(guests, many=True)
     return Response(serializer.data)
->>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
+
