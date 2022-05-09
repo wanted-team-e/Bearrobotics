@@ -179,7 +179,7 @@ def get_restaurants_id_address(address):
 
 def is_res_in_pos(group_name):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     restaurants_id_list = get_restaurants_id(group_name)
     arr = []
@@ -194,7 +194,7 @@ def is_res_in_pos(group_name):
 
 def date_return_cons(request):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -215,7 +215,7 @@ def date_return_cons(request):
 
 def is_timeunit(request):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
     timeunit = request.GET.get('timeunit')
@@ -224,9 +224,18 @@ def is_timeunit(request):
     return True
 
 
+def put_zero(str):
+    """
+        작성자 : 서재환
+    """
+    if len(str) == 1:
+        str = '0' + str
+    return str
+
+
 def fake_deserializer_year(queryset):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     res = []
     price_arr = []
@@ -255,18 +264,9 @@ def fake_deserializer_year(queryset):
     return res
 
 
-def put_zero(str):
-    """
-    editor: 서재환
-    """
-    if len(str) == 1:
-        str = '0' + str
-    return str
-
-
 def fake_desrializer_month(queryset):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     res = []
     price_arr = []
@@ -299,7 +299,7 @@ def fake_desrializer_month(queryset):
 
 def fake_deserializer_week(queryset):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     res = []
     price_arr = []
@@ -332,7 +332,7 @@ def fake_deserializer_week(queryset):
 
 def fake_deserializer_day(queryset):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     res = []
     price_arr = []
@@ -363,7 +363,7 @@ def fake_deserializer_day(queryset):
 
 def fake_deserializer_hour(queryset):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     res = []
     price_arr = []
@@ -397,7 +397,7 @@ def fake_deserializer_hour(queryset):
 
 def timeunit_return_queryset(request, guests):
     """
-    editor: 서재환
+        작성자 : 서재환
     """
     timeunit = request.GET.get('timeunit')
     timeunit_group = ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']
@@ -433,6 +433,9 @@ def timeunit_return_queryset(request, guests):
 
 
 def is_city_exsist(city_name):
+    """
+        작성자 : 서재환
+    """
     queryset = Restaurant.objects.filter(address__contains=city_name)
     if len(queryset) == 0:
         return False
