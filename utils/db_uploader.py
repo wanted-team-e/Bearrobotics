@@ -6,7 +6,7 @@ import csv
 
 # system setup
 sys.path.append((os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'config.develop')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'config.settings.develop')
 django.setup()
 
 from django.conf import settings
@@ -55,7 +55,7 @@ def insert_guest():
         for row in data_reader:
             if row['id']:
                 Guest.objects.get_or_create(id = row['id'],
-                timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M:%S"),
+                timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M"),
                 restaurant_id = row['restaurant_id'],
                 price = int(row['price']),
                 number_of_party = int(row['number_of_party']),

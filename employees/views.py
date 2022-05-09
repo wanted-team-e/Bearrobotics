@@ -1,11 +1,13 @@
 
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from employees.jwt import generate_access_token
 from employees.models import Employee
+from employees.permissions import EmployeePermission
 from employees.serializers import EmployeeSerializer, UserSignupSerializer, UserLoginSerializer
 
 
@@ -13,6 +15,15 @@ class UserViewSet(mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin, GenericViewSet):
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action in ['signup', 'login', 'retrieve', 'list']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [EmployeePermission]
+        return [permission() for permission in permission_classes]
+
 
     def get_queryset(self):
         if self.action == 'list':
