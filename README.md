@@ -132,7 +132,6 @@ POS 정보 수정 : PUT /api/pos/:pk
 POS 정보 삭제 : DELETE /api/pos/:pk
 - pk 값에 해당하는 POS 정보를 삭제합니다.  
 
-
 POS 정보 중 레스토랑별 총 매출 조회 : GET /api/pos/total_price?start_time=YYYY-mm-dd 00:00:00&end_time=YYYY-mm-dd 00:00:00&timeunit=...  
 -   레스토랑별 총 매출 통계 정보를 파라미터로 넘어온 기간에 따라 필터링하여 조회합니다.
 
@@ -161,7 +160,7 @@ POS 정보 중 레스토랑, 결제 방식별 결제 수 조회 : GET /api/pos/p
 
 
 #### BONUS PART
-**그룹 정보(Guest)**
+**그룹 정보(Group)**
 
 그룹과 관련한 모든 POS조회 : GET /api/group/
 - 그룹 상관없이 전체 그룹과 관련된 POS 정보를 조회합니다.
@@ -196,6 +195,7 @@ POS 정보 중 레스토랑, 메뉴별 총 매출 조회 : GET /api/menu/total_p
 > ### 구현 과정 중 특이사항
 - utils/db_uploader.py를 사용하여 주어진 데이터셋을 database에 바로 저장해 요구사항을 확인, 구현하였습니다.
 - 각 restaurant의 임의의 필터링을 거친 정렬된 KPI 자료들을 확인할 수 있도록 구현하였습니다.
+
 
 ### Step to run
 ```
