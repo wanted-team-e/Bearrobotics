@@ -8,7 +8,8 @@ from drf_yasg.utils import swagger_auto_schema
 
 from restaurants.models import Restaurant, Guest, Group
 from restaurants.permissions import RestaurantPermission
-from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer, GuestSerializer
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer
+from restaurants.serializers import GuestSerializer
 
 from restaurants.utils import commons
 
@@ -248,7 +249,7 @@ def get_guest(self):
         작성자 : 서재환
     """
     group_list = Guest.objects.all()
-    serializer = GuestCUDSerializer(group_list, many=True)
+    serializer = GuestSerializer(group_list, many=True)
     return Response(serializer.data)
 
 
