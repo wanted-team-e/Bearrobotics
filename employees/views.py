@@ -20,9 +20,9 @@ class UserViewSet(mixins.RetrieveModelMixin,
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
-            permission_classes = (AllowAny,)
+            permission_classes.append(AllowAny,)
         else:
-            permission_classes = (EmployeePermission,)
+            permission_classes.append(EmployeePermission,)
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
