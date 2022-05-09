@@ -16,6 +16,9 @@ class UserViewSet(mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin, GenericViewSet):
 
+
+    queryset = Employee.objects.all()
+    
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
@@ -23,13 +26,6 @@ class UserViewSet(mixins.RetrieveModelMixin,
         else:
             permission_classes = (EmployeePermission, )
         return [permission() for permission in permission_classes]
-
-
-    def get_queryset(self):
-        if self.action == 'list':
-            return Employee.objects.all().order_by('-group')
-        else:
-            return Employee.objects.all()
 
 
     def get_serializer_class(self):
