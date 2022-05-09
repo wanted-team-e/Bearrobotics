@@ -5,10 +5,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from restaurants.models import Restaurant, Guest
+from restaurants.models import Restaurant, Guest, Menu
 from restaurants.permissions import RestaurantPermission
 from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, \
-    TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer
+    TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer, MenuSerializer
 
 from restaurants.utils import commons
 
@@ -187,6 +187,17 @@ class RestaurantViewset(viewsets.ModelViewSet):
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
                                               "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description='menu list api',
+        operation_summary='레스토랑의 pk 값에 따른 메뉴 리스트 api입니다.',
+    )
+    @action(detail=True, methods=['GET'])
+    def menu(self, request, pk):
+        queryset = Menu.objects.filter(group__id=pk)
+        serializers = MenuSerializer(queryset, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
 
 
 from restaurants.utils.commons import *
