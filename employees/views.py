@@ -17,7 +17,6 @@ class UserViewSet(mixins.RetrieveModelMixin,
                   mixins.ListModelMixin, GenericViewSet):
     queryset = Employee.objects.all()
 
-
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
