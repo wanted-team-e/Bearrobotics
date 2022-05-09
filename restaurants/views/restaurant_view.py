@@ -252,6 +252,7 @@ def get_city_list(request, city_name):
     editor: 서재환
     """
     q = Q()
+    restaurant_id_list = []
     if not commons.is_city_exsist:
         return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
     if commons.is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
