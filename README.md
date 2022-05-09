@@ -71,6 +71,12 @@
 >- utils/db_uploader.py를 사용하여 주어진 데이터셋을 database에 바로 저장해 요구사항을 확인, 구현하였습니다.
 >- 각 restaurant의 임의의 필터링을 거친 정렬된 KPI 자료들을 확인할 수 있도록 구현하였습니다.
 
+### 인증 테스트 방법
+- api/users/signup : 회원가입
+- api/users/login : 로그인후 반환된 토큰 값 헤더에 넣기
+<br><img src="./source/modheader.png" alt="mod"/>
+- postman으로 넣는 방법도있으나 chrome 확장프로그램중 modheader를 이용해 인증
+- PUT api/users/:pk : 유저 rank_type = CONFIRM으로 변경 후 서비스 이용
 
 ### Step to run
 ```
