@@ -3,7 +3,7 @@
 # Team_E_Business Tasks _ Bearrobotics
 원티드 프리온보딩 코스 _ 두번째 기업과제 _ 베어로보틱스
 
-### 배포 주소 [GoTo](http://13.125.224.101/api)
+### 배포 주소 [GoTo](http://13.125.224.101/api/users/signup)
 ### 팀 노션 [GoTo](https://www.notion.so/Bearrobotics-a520ef6ae09246488ab573ad247083ee)
 - 요구사항 분석, 정보 공유 및 프로젝트 진행을 위해 사용
 
