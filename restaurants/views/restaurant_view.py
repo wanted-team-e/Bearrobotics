@@ -203,6 +203,12 @@ class RestaurantViewset(viewsets.ModelViewSet):
 from restaurants.utils.commons import *
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/pos/',
+    operation_summary='Return Fields: (restaurant_name, price, number_of_party, timestamp, payment)',
+)
+
 @api_view(['GET'])
 def get_guest(self):
     """
@@ -212,6 +218,12 @@ def get_guest(self):
     serializer = GuestCUDSerializer(group_list, many=True)
     return Response(serializer.data)
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/group/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
 
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
@@ -251,6 +263,12 @@ def get_certain_group_list(request, group_name):
         return Response(queryset)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/address/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
+
 @api_view(['GET'])
 def get_city_list(request, city_name):
     """
@@ -258,6 +276,7 @@ def get_city_list(request, city_name):
     """
     q = Q()
     restaurant_id_list = []
+
     if not is_city_exsist:
         return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
     if is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
