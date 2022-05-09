@@ -1,4 +1,4 @@
-
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -18,7 +18,7 @@ class UserViewSet(mixins.RetrieveModelMixin,
 
 
     queryset = Employee.objects.all()
-    
+
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
@@ -36,6 +36,38 @@ class UserViewSet(mixins.RetrieveModelMixin,
         else:
             return EmployeeSerializer
 
+    @swagger_auto_schema(
+        operation_description='유저 수정 api 입니다.',
+        operation_summary='user update api'
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description='유저 삭제 api 입니다.',
+        operation_summary='user delete api'
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description='유저 상세보기 api 입니다.',
+        operation_summary='user retrieve api'
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description='유저 리스트 보기 api 입니다.',
+        operation_summary='user list api'
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description='유저 로그인 api 입니다.',
+        operation_summary='user login api'
+    )
     @action(methods=['post'], detail=False)
     def login(self, request):
         data = {}
@@ -47,6 +79,10 @@ class UserViewSet(mixins.RetrieveModelMixin,
         data['id'] = employee.id
         return Response(data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description='유저 회원가입 api 입니다.',
+        operation_summary='user signup(create) api'
+    )
     @action(methods=['post'], detail=False)
     def signup(self, request):
         data = {}

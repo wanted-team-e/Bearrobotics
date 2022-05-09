@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from restaurants.models import Restaurant, Guest, Group
+from restaurants.models import Restaurant, Guest, Group, Menu
 
 
 class RestaurantCUDSerializer(serializers.ModelSerializer):
@@ -129,3 +129,14 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
+
+class MenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Menu
+        fields = (
+            'group',
+            'name',
+            'price',
+            'created_at',
+            'updated_at',
+        )
