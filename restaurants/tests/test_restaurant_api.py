@@ -10,8 +10,12 @@ base_url = reverse('restaurants-list') # api/restaurant
 post_data = {'name':'비비고', 'city':'서울', 'address':'관악구 서울대입구', 'group':'1'}
 
 
-def test_list(client):
-    response = client.get(base_url)
+
+def test_list(client, gen_token):
+    token= gen_token()
+    print(token)
+    response = client.get(path=base_url,headers=token)
+    print(json.loads(response.content))
     assert response.status_code == 200
 
 
@@ -74,3 +78,11 @@ def test_retrieve_party(client):
     assert json.loads(response.content)[0] == {'number_of_party': 2, 'day': 23, 'restaurant_id': 21, 'count': 2}
 
 
+def test_list_group(client):
+    response = client.get(path='http://127.0.0.1:8000/api/group')
+    print(json.loads(response.content))
+    assert response.status_code == 200
+
+def test_retrieve_name(client):
+    response = client.get('http://127.0.0.1:8000/api/group/서울')
+    assert response.status_code == 200

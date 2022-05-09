@@ -38,7 +38,7 @@ def insert_restaurant():
         for row in data_reader:
             if row['id']:
                 Restaurant.objects.get_or_create(id = row['id'],
-                name = row['restaurant'],
+                name = row['name'],
                 city = row['city'],
                 address = row['address'],
                 group_id = row['group_id']
