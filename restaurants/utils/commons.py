@@ -122,16 +122,24 @@ def set_swagger():
     """
         작성자 : 김채욱
     """
-    param_1 = openapi.Parameter( 'start_time', openapi.IN_QUERY, description='start time/end time(must)', type=openapi.TYPE_STRING )
-    param_2 = openapi.Parameter( 'endtime', openapi.IN_QUERY, description='start time/end time(must)', type=openapi.TYPE_STRING )
-    param_3 = openapi.Parameter( 'timeunit', openapi.IN_QUERY, description='aggregation time window (must)', type=openapi.TYPE_STRING )
-    param_4 = openapi.Parameter( 'min_price', openapi.IN_QUERY, description='price range(optional)', type=openapi.TYPE_INTEGER )
-    param_5 = openapi.Parameter( 'max_price', openapi.IN_QUERY, description='price range(optional)', type=openapi.TYPE_INTEGER )
-    param_6 = openapi.Parameter( 'min_party', openapi.IN_QUERY, description='number of party(optional)', type=openapi.TYPE_INTEGER )
-    param_7 = openapi.Parameter( 'max_party', openapi.IN_QUERY, description='number of party(optional)', type=openapi.TYPE_INTEGER )
-    param_8 = openapi.Parameter( 'group', openapi.IN_QUERY, description='restaurant group(optional)', type=openapi.TYPE_INTEGER )
+    param_1 = openapi.Parameter('start_time', openapi.IN_QUERY, description='start time/end time(must)',
+                                type=openapi.TYPE_STRING)
+    param_2 = openapi.Parameter('endtime', openapi.IN_QUERY, description='start time/end time(must)',
+                                type=openapi.TYPE_STRING)
+    param_3 = openapi.Parameter('timeunit', openapi.IN_QUERY, description='aggregation time window (must)',
+                                type=openapi.TYPE_STRING)
+    param_4 = openapi.Parameter('min_price', openapi.IN_QUERY, description='price range(optional)',
+                                type=openapi.TYPE_INTEGER)
+    param_5 = openapi.Parameter('max_price', openapi.IN_QUERY, description='price range(optional)',
+                                type=openapi.TYPE_INTEGER)
+    param_6 = openapi.Parameter('min_party', openapi.IN_QUERY, description='number of party(optional)',
+                                type=openapi.TYPE_INTEGER)
+    param_7 = openapi.Parameter('max_party', openapi.IN_QUERY, description='number of party(optional)',
+                                type=openapi.TYPE_INTEGER)
+    param_8 = openapi.Parameter('group', openapi.IN_QUERY, description='restaurant group(optional)',
+                                type=openapi.TYPE_INTEGER)
 
-    manual_parameters = [param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8]
+    manual_parameters = [param_1, param_2, param_3, param_4, param_5, param_6, param_7, param_8]
     return manual_parameters
 
 
@@ -140,7 +148,7 @@ def is_group_name_in_group(group_name):
         작성자 : 서재환
     """
     try:
-        group = Group.objects.get(name = group_name)
+        group = Group.objects.get(name=group_name)
     except:
         return False
     return True
@@ -152,7 +160,7 @@ def get_restaurants_id(group_name):
     """
     restaurants = []
     restaurants_id_list = []
-    group_id = Group.objects.get(name = group_name)
+    group_id = Group.objects.get(name=group_name)
     restaurants = Restaurant.objects.filter(group_id=group_id)
     if len(restaurants) == 0:
         return None
@@ -167,8 +175,8 @@ def get_restaurants_id_address(address):
         작성자 : 서재환
     """
     restaurants_id_list = []
-    address_queryset = Restaurant.objects.filter(address__contains = address)
-    
+    address_queryset = Restaurant.objects.filter(address__contains=address)
+
     if len(address_queryset) == 0:
         return None
     for restaurant in address_queryset:
@@ -203,13 +211,13 @@ def date_return_cons(request):
     if start_date == None and end_date == None:
         return q
     elif start_date != None and end_date == None:
-        q.add(Q(timestamp = start_date), q.AND)
+        q.add(Q(timestamp=start_date), q.AND)
     elif start_date == None and end_date != None:
-        q.add(Q(timestamp = end_date), q.AND)
+        q.add(Q(timestamp=end_date), q.AND)
     elif start_date > end_date:
         return
     elif start_date is not None and end_date is not None:
-        q.add(Q(timestamp__range = (start_date, end_date)), q.AND)
+        q.add(Q(timestamp__range=(start_date, end_date)), q.AND)
     return q
 
 
@@ -264,7 +272,7 @@ def fake_deserializer_year(queryset):
     return res
 
 
-def fake_desrializer_month(queryset):
+def fake_deserializer_month(queryset):
     """
         작성자 : 서재환
     """
@@ -322,7 +330,7 @@ def fake_deserializer_week(queryset):
 
     if price_start != 0:
         price_arr.append(price_start)
-    if start_week  != 0:
+    if start_week != 0:
         week_arr.append(start_week)
     print(week_arr, price_arr)
     for i in range(len(price_arr)):
@@ -387,7 +395,7 @@ def fake_deserializer_hour(queryset):
             price_start += price
     if price_start != 0:
         price_arr.append(price_start)
-    if start_hour  != 0:
+    if start_hour != 0:
         timestamp_arr.append(start_hour)
     timestamp_arr = sorted(set(timestamp_arr))
     for i in range(len(timestamp_arr)):
@@ -407,18 +415,18 @@ def timeunit_return_queryset(request, guests):
         if timeunit == 'YEAR':
             guests = guests.values('timestamp') \
                 .annotate(year=ExtractYear('timestamp'), total_price=Sum('price'))
-            guests = guests.values('timestamp','total_price','year')
-            guests = fake_deserializer_year(guests)        
+            guests = guests.values('timestamp', 'total_price', 'year')
+            guests = fake_deserializer_year(guests)
         elif timeunit == 'MONTH':
             guests = guests.values('timestamp') \
                 .annotate(month=ExtractMonth('timestamp'), total_price=Sum('price'))
-            guests = guests.values('timestamp','total_price','month')
-            guests = fake_desrializer_month(guests)
+            guests = guests.values('timestamp', 'total_price', 'month')
+            guests = fake_deserializer_month(guests)
         elif timeunit == 'WEEK':
             guests = guests.values('timestamp') \
                 .annotate(week=ExtractWeek('timestamp'), total_price=Sum('price'))
-            guests = guests.values('timestamp','total_price','week')
-            guests = fake_deserializer_week(guests)                
+            guests = guests.values('timestamp', 'total_price', 'week')
+            guests = fake_deserializer_week(guests)
         elif timeunit == 'DAY':
             guests = guests.values('timestamp') \
                 .annotate(day=ExtractDay('timestamp'), total_price=Sum('price'))
@@ -432,7 +440,7 @@ def timeunit_return_queryset(request, guests):
     return Response({'error_message': "['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'] 중 하나의 인자 값을 넣으시오"})
 
 
-def is_city_exsist(city_name):
+def is_city_exist(city_name):
     """
         작성자 : 서재환
     """

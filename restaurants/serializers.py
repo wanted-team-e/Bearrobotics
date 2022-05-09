@@ -130,6 +130,7 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = '__all__'
 
+
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu

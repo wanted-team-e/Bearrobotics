@@ -1,11 +1,11 @@
-from django.db.models import Q, Sum, Count, F
-from rest_framework import viewsets, status
+from django.db.models import Count, F
+from rest_framework import viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+
 from drf_yasg.utils import swagger_auto_schema
 
-from restaurants.models import Restaurant, Guest, Menu
+from restaurants.models import Restaurant, Menu
 from restaurants.permissions import RestaurantPermission
 from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, \
     TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer, MenuSerializer
@@ -13,7 +13,7 @@ from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializ
 from restaurants.utils import commons
 
 
-class RestaurantViewset(viewsets.ModelViewSet):
+class RestaurantViewSet(viewsets.ModelViewSet):
     """
         작성자 : 강정희
     """
@@ -199,10 +199,14 @@ class RestaurantViewset(viewsets.ModelViewSet):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
-
 from restaurants.utils.commons import *
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/pos/',
+    operation_summary='Return Fields: (restaurant_name, price, number_of_party, timestamp, payment)',
+)
 @api_view(['GET'])
 def get_guest(self):
     """
@@ -213,6 +217,11 @@ def get_guest(self):
     return Response(serializer.data)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/group/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
 @api_view(['GET'])
 def get_certain_group_list(request, group_name):
     """
@@ -230,7 +239,7 @@ def get_certain_group_list(request, group_name):
         return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
     restaurants_id = get_restaurants_id(group_name)
     for id in restaurants_id:
-        guests += Guest.objects.filter(restaurant_id = id)
+        guests += Guest.objects.filter(restaurant_id=id)
     q = q.add(date_return_cons(request), q.AND)
     if not request.GET.get('timeunit') and not request.GET.get('start_date') and not request.GET.get('end_date'):
         serializer = GuestCUDSerializer(guests, many=True)
@@ -240,7 +249,7 @@ def get_certain_group_list(request, group_name):
     if isinstance(date_return_cons(request), Q) and not request.GET.get('timeunit'):
         guest = Guest.objects.none()
         for id in restaurants_id:
-            query_set = Guest.objects.filter(restaurant_id = id)
+            query_set = Guest.objects.filter(restaurant_id=id)
             guest |= query_set
         guests = guest.filter(q).order_by('timestamp')
         serializer = GuestCUDSerializer(guests, many=True)
@@ -251,6 +260,11 @@ def get_certain_group_list(request, group_name):
         return Response(queryset)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='GET api/address/',
+    operation_summary='Return Fields: (restaurant_id, price, number_of_party, timestamp, payment)',
+)
 @api_view(['GET'])
 def get_city_list(request, city_name):
     """
@@ -258,9 +272,11 @@ def get_city_list(request, city_name):
     """
     q = Q()
     restaurant_id_list = []
-    if not is_city_exsist:
+
+    if not is_city_exist:
         return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
-    if is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
+    if is_city_exist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get(
+            'timeunit'):
         queryset = Restaurant.objects.filter(address__contains=city_name)
         for restaurant in queryset:
             restaurant_id_list.append(restaurant.id)
@@ -282,7 +298,7 @@ def get_city_list(request, city_name):
         q &= date_return_cons(request)
         guest = Guest.objects.none()
         for id in restaurant_id_list:
-            query_set = Guest.objects.filter(restaurant_id = id)
+            query_set = Guest.objects.filter(restaurant_id=id)
             guest |= query_set
         guests = guest.filter(q).order_by('timestamp')
         serializer = GuestCUDSerializer(guests, many=True)
@@ -291,7 +307,7 @@ def get_city_list(request, city_name):
         q &= date_return_cons(request)
         guest = Guest.objects.none()
         for id in restaurant_id_list:
-            query_set = Guest.objects.filter(restaurant_id = id)
+            query_set = Guest.objects.filter(restaurant_id=id)
             guest |= query_set
         guests = guest.filter(q).order_by('timestamp')
         queryset = timeunit_return_queryset(request, guests)

@@ -12,21 +12,18 @@ from employees.serializers import EmployeeSerializer, UserSignupSerializer, User
 
 
 class UserViewSet(mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.ListModelMixin, GenericViewSet):
-
-
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.ListModelMixin, GenericViewSet):
     queryset = Employee.objects.all()
 
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
-            permission_classes = (AllowAny, )
+            permission_classes = (AllowAny,)
         else:
-            permission_classes = (EmployeePermission, )
+            permission_classes = (EmployeePermission,)
         return [permission() for permission in permission_classes]
-
 
     def get_serializer_class(self):
         if self.action in 'signup':
@@ -73,7 +70,7 @@ class UserViewSet(mixins.RetrieveModelMixin,
         data = {}
         employee = self.get_serializer().validate(request.data)
         if employee is None:
-            return Response({'message':'Not Valid request data'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Not Valid request data'}, status=status.HTTP_400_BAD_REQUEST)
         data['access_token'] = generate_access_token(employee)
         data['email'] = employee.email
         data['id'] = employee.id

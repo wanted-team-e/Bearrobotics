@@ -36,8 +36,10 @@ class Guest(models.Model):
         max_length=20,
         choices=PaymentType.choices
     )
+
     class Meta:
         app_label = 'restaurants'
+
 
 class Group(models.Model):
     """

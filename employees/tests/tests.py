@@ -1,10 +1,8 @@
 import pytest, json
-
+from rest_framework.test import APIClient
 from django.urls import reverse
 
 pytest_mark = pytest.mark.django_db
-
-base_url = reverse('users')
 
 user_detail_data = {
     "email": "ed22c@naver.com",
@@ -24,3 +22,15 @@ user_login_data = {
 }
 
 
+
+def set_credential():
+    resp = APIClient.post(
+        '127.0.0.1:8000/api/employees/signup', {'email': 'edc22c@naver.com', 'password': 'asdasd15s', 'username': '이형준'}
+    )
+    tokens = json.loads(resp.content)
+    access_token = tokens.get('access_token', None)
+    print(access_token)
+    APIClient.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+
+set_credential()
