@@ -121,6 +121,8 @@ $ python manage.py runserver
 * 배포
   * AWS EC2
   * DOCKER
+* test code
+  * user CRUD & get headers
 
 ### 서재환
 * Guest model 모델링 및 ERD 작성

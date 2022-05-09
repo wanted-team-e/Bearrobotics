@@ -17,12 +17,13 @@ class UserViewSet(mixins.RetrieveModelMixin,
                   mixins.ListModelMixin, GenericViewSet):
     queryset = Employee.objects.all()
 
+
     def get_permissions(self):
         permission_classes = []
         if self.action in ('signup', 'login', 'retrieve', 'list'):
-            permission_classes.append(AllowAny,)
+            permission_classes = (AllowAny,)
         else:
-            permission_classes.append(EmployeePermission,)
+            permission_classes = (EmployeePermission,)
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
