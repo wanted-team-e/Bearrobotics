@@ -144,6 +144,21 @@ def get_restaurants_id(group_name):
     return restaurants_id_list
 
 
+def get_restaurants_id_address(address):
+    """
+        작성자 : 서재환
+    """
+    restaurants_id_list = []
+    address_queryset = Restaurant.objects.filter(address__contains = address)
+    
+    if len(address_queryset) == 0:
+        return None
+    for restaurant in address_queryset:
+        restaurants_id_list.append(restaurant.id)
+    restaurants_id_list = set(restaurants_id_list)
+    return restaurants_id_list
+
+
 def is_res_in_pos(group_name):
     """
     editor: 서재환
