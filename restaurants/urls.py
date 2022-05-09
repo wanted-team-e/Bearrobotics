@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from restaurants.views import RestaurantViewset, GuestViewset, get_guest, get_certain_group_list, get_city_list
+from restaurants.views import *
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r'restaurant', RestaurantViewset, basename='restaurants')
