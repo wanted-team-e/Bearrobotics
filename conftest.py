@@ -30,10 +30,19 @@ def client():
 
 
 @pytest.fixture()
-def headers(client):
+def get_normal_user_headers(client):
     url = 'http://127.0.0.1:8000/api/users/signup'
     u_data = {'email':'kid@gmail.com', 'password':'Pqweasd31!','username':'dstranger'}
     request = client.post(path=url, data=u_data)
     headers = request.data['access_token']
     headers = {'HTTP_Authorization': f'Bearer "{headers}"'}
+    return headers
+
+
+@pytest.fixture()
+def get_confirm_user_headers(client, get_normal_user_headers):
+    url = 'http://127.0.0.1:8000/api/users/1'
+    u_data = {'email':'kid@gmail.com','username':'dstranger', 'rank_type':'CONFIRM'}
+    headers = get_normal_user_headers
+    request = client.put(path=url, data=u_data, **headers)
     return headers

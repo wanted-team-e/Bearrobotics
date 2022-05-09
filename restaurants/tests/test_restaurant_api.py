@@ -9,6 +9,8 @@ base_url = reverse('restaurants-list')  # api/restaurant
 post_data = {'name': '비비고', 'city': '서울', 'address': '관악구 서울대입구', 'group': '1'}
 
 
+
+
 def test_list(client, headers):
     response = client.get(path=base_url, **headers)
     assert response.status_code == 200
@@ -52,7 +54,7 @@ def test_retrieve_totalPrice(client, headers):
     assert json.loads(response.content)[0] == {'restaurant_id': 21, 'day': 23, 'total_price': 40000}
 
 
-def test_retrieve_payment(client, headers):
+def test_retrieve_payment(client):
     detail_url = reverse('restaurants-detail', args=['payment'])
     parameters = '?&timeunit=day&start_time=2022-02-23%2013:14&end_time=2022-02-28%2014:14'
     detail_url += parameters
@@ -62,7 +64,7 @@ def test_retrieve_payment(client, headers):
     assert json.loads(response.content)[0] == {'restaurant_id': 21, 'payment': 'BITCOIN', 'day': 24, 'count': 1}
 
 
-def test_retrieve_party(client, headers):
+def test_retrieve_party(client):
     detail_url = reverse('restaurants-detail', args=['party'])
     parameters = '?&timeunit=day&start_time=2022-02-23%2013:14&end_time=2022-02-28%2014:14'
     detail_url += parameters
@@ -72,12 +74,12 @@ def test_retrieve_party(client, headers):
     assert json.loads(response.content)[0] == {'number_of_party': 2, 'day': 23, 'restaurant_id': 21, 'count': 2}
 
 
-def test_list_group(client, headers):
+def test_list_group(client):
     response = client.get(path='http://127.0.0.1:8000/api/group')
     print(json.loads(response.content))
     assert response.status_code == 200
 
 
-def test_retrieve_name(client, headers):
+def test_retrieve_name(client):
     response = client.get('http://127.0.0.1:8000/api/group/서울')
     assert response.status_code == 200
