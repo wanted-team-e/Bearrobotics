@@ -22,3 +22,5 @@ user_login_data = {
     "email": "ed22c@naver.com",
     "password": "gudwns22",
 }
+
+
