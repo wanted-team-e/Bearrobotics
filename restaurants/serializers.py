@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from restaurants.models import Restaurant, Guest
+from restaurants.models import Restaurant, Guest, Group
 
 
 class RestaurantCUDSerializer(serializers.ModelSerializer):
@@ -97,6 +97,19 @@ class GuestCUDSerializer(serializers.ModelSerializer):
             'payment'
         )
 
+        read_only_fields = (
+            'group',
+        )
+
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    """
+        editor : 서재환
+    """
+    class Meta:
+        model = Group
+        fields = '__all__'
 
 class GuestRSerializer(serializers.ModelSerializer):
     """
@@ -113,3 +126,4 @@ class GuestRSerializer(serializers.ModelSerializer):
             'timestamp',
             'payment'
         )
+

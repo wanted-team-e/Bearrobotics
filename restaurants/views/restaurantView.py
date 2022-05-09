@@ -7,8 +7,12 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from restaurants.models import Restaurant, Guest, Group
+<<<<<<< HEAD:restaurants/views.py
+from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestSerializer    
+=======
 from restaurants.permissions import RestaurantPermission
 from restaurants.serializers import RestaurantCUDSerializer, RestaurantRSerializer, TotalPriceDocsSerializer, PaymentDocsSerializer, PartyDocsSerializer, GuestCUDSerializer
+>>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
 
 from restaurants.utils import commons
 
@@ -173,7 +177,7 @@ class RestaurantViewset(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return Response({'error_message': "기간은 'start_time=yyyy-mm-dd 00:00:00&end_time=yyyy-mm-dd 00:00:00"
-                                              "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
+                                            "&timeunit=hour/day/week/month/year' 형식으로 요청 가능합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -232,15 +236,34 @@ class RestaurantViewset(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+<<<<<<< HEAD:restaurants/views.py
+from rest_framework.decorators import api_view
+
+class GuestViewset(viewsets.ModelViewSet):
+    """
+    editor: 서재환
+    """
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
+
+
+@api_view(['GET'])
+def get_guest(request):
+    """
+    editor: 서재환
+=======
 @api_view(['GET'])
 def get_guest(self):
     """
         작성자 : 서재환
+>>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
     """
     group_list = Guest.objects.all()
     serializer = GuestCUDSerializer(group_list, many=True)
     return Response(serializer.data)
 
+<<<<<<< HEAD:restaurants/views.py
+=======
 
 @api_view(['GET'])
 def get_certain_group_list(self, request):
@@ -257,20 +280,79 @@ def get_certain_group_list(self, request):
 
     if len(groups) == 0:
         return Response({'error_message': '해당 그룹이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
+>>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
 
-    group_id = groups[0].id 
+@api_view(['GET'])
+def get_certain_group_list(request, group_name):
+    """
+    editor: 서재환
+    """
+    q = Q()
+    guests = []
+    if group_name and not commons.is_group_name_in_group(group_name):
+        return Response({'error_message': '해당 그룹이 없습니다.'})
+    if commons.get_restaurants_id(group_name) == None:
+        return Response({'error_message': '그룹이름에 해당하는 레스토랑이 없습니다.'})
+    if group_name and not commons.is_res_in_pos(group_name):
+        return Response({'error_message': '레스토랑이 POS기에 없습니다.'})      
+    if not isinstance(commons.date_return_cons(request), Q):
+        return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
+    restaurants_id = commons.get_restaurants_id(group_name)
+    for id in restaurants_id:
+        guests += Guest.objects.filter(restaurant_id = id)
+    q = q.add(commons.date_return_cons(request), q.AND)
+    if not request.GET.get('timeunit') and not request.GET.get('start_date') and not request.GET.get('end_date'):
+        serializer = GuestSerializer(guests, many=True)
+        return Response(serializer.data)    
+    if request.GET.get('timeunit') and not commons.is_timeunit(request):
+        return Response({'error_message': "timeunit은 ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']중 하나"})
+    if commons.is_timeunit(request) and not request.GET.get('timeunit'):
+        guests = GuestSerializer(guests, many=True)
+        return Response(guests.data)
+    if isinstance(commons.date_return_cons(request), Q) and not request.GET.get('timeunit'):
+        q1 = Q()
+        guest = Guest.objects.none()
+        for id in restaurants_id:
+            query_set = Guest.objects.filter(restaurant_id = id)
+            guest |= query_set
+        q &= commons.date_return_cons(request)
+        guests = guest.filter(q).order_by('timestamp')
+        serializer = GuestSerializer(guests, many=True)
+        return Response(serializer.data)
+    if request.GET.get('timeunit') and commons.is_timeunit(request):
+        guests = Guest.objects.filter(q)
+        queryset = commons.timeunit_return_queryset(request, guests)
+        return Response(queryset)
+
+<<<<<<< HEAD:restaurants/views.py
+
+@api_view(['GET'])
+def get_city_list(request, city_name):
+    """
+    editor: 서재환
+    """
+    q = Q()
+    restaurant_id_list = []
+    if not commons.is_city_exsist:
+        return Response({'error_message': '입력하신 도시에 레스토랑이 없습니다.'})
+    if commons.is_city_exsist and not request.GET.get('start_date') and not request.GET.get('end_date') and not request.GET.get('timeunit'):
+        queryset = Restaurant.objects.filter(address__contains=city_name)
+        for restaurant in queryset:
+            restaurant_id_list.append(restaurant.id)
+        guests = Guest.objects.none()
+        for id in restaurant_id_list:
+            guest = Guest.objects.filter(restaurant_id=id)
+            guests |= guest
+        guests = guests.order_by('timestamp')
+        if len(guests) == 0:
+            return Response({'error_message': 'pos에 해당 도시에 있는 레스토랑이 없습니다.'})
+        guests = GuestSerializer(guests, many=True)
+        return Response(guests.data)
+    if not isinstance(commons.date_return_cons(request), Q):
+        return Response({'error_message': 'start_date가 end_date 보다 작아야됩니다.'})
+    q &= commons.date_return_cons(request)
     
-    restaurants = Restaurant.objects.all().filter(group_id==group_id)
-
-    if len(restaurants) == 0:
-        return Response({'error_message': '해당 그룹에 해당하는 레스토랑이 없습니다.'}, stats=status.HTTP_400_BAD_REQUEST)
-
-    for id in restaurants:
-        restaurants_id_list.append(restaurants[id])
-    restaurants_id_list = set(restaurants_id_list)
-
-    for id in restaurants_id_list:
-        certain_group = Guest.objects.all().filter(restaurnat_id = id)
-
+=======
     serializer = GuestCUDSerializer(certain_group, many=True)
     return Response(serializer.data)
+>>>>>>> f78a94833b6a0f0e8a95ea267848a5d8891eedcc:restaurants/views/restaurantView.py
