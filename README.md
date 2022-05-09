@@ -161,8 +161,7 @@ POS 정보 중 레스토랑, 결제 방식별 결제 수 조회 : GET /api/pos/p
 
 
 #### BONUS PART
-POS 정보 중 기간별 총 매출 조회 : GET /api/group/total_price?start_time=YYYY-mm-dd 00:00:00&end_time=YYYY-mm-dd 00:00:00&timeunit=...  
-- 총 매출 정보를 파라미터로 넘어온 기간에 따라 필터링하여 조회합니다.
+**그룹 정보(Guest)**
 
 그룹과 관련한 모든 POS조회 : GET /api/group/
 - 그룹 상관없이 전체 그룹과 관련된 POS 정보를 조회합니다.
