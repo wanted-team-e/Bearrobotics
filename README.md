@@ -1,7 +1,16 @@
-<img src="https://image.rocketpunch.com/company/79452/beeorobotigseukoria_logo_1591678224.png?s=400x400&t=inside" alt="erd"/>
+<div align="center"><img src="https://image.rocketpunch.com/company/79452/beeorobotigseukoria_logo_1591678224.png?s=400x400&t=inside" alt="erd"/></div>
 
-# Team_E_Business Tasks _ Bearrobotics
+# 목차
+
+- [Bearrobotics_기업과제](#Bearrobotics_기업과제)
+- [과제 해석](#과제-해석)
+- [구현 요구사항](#구현-요구사항)
+- [구현](#구현)
+- [Author](#Author)
+
+# Bearrobotics_기업과제
 원티드 프리온보딩 코스 _ 두번째 기업과제 _ 베어로보틱스
+
 
 ### 배포 주소 [GoTo](http://13.125.224.101/api/users/signup)
 ### 팀 노션 [GoTo](https://www.notion.so/Bearrobotics-a520ef6ae09246488ab573ad247083ee)
@@ -66,7 +75,7 @@
 > ### ERD
 <img src="./source/bearrobotics_erd.png" alt="erd"/>
 
-> ### API 명세
+> ### See Document
 > http://13.125.224.101/swagger
 
 > ### 구현 과정 중 특이사항
@@ -85,7 +94,7 @@
 $ python -m venv venv
 $ source venv/Scripts/activate
 $ python install -r requirements.txt
-$ python manage.py runserver
+$ python manage.py runserver --settings=config.settings.develop
 ```
 
 ## Author
@@ -134,19 +143,15 @@ $ python manage.py runserver
 
 ### 서재환
 * Guest model 모델링 및 ERD 작성
-
 * POS CRUD API
    - POS 관련 CRUD api 작성
-
 * DB UPLOADER 및 CSV file 작성
    - api 조회를 위한 데이터베이스 세팅
-
 * 그룹 API 
    - 특정 그룹에 속한 것과 상관없이 모든 POS 정보 조회
    - 그룹이름이 그룹테이블에 있는지 조회하고 해당 그룹에 속한 POS 정보를 조회
    - 특정 기간 동안 특정 그룹의 POS 정보를 조회
    - 특정 기간 동안 특정 그룹에 속하는 POS 정보를 시간, 일, 주, 달, 연 중 하나로 그룹핑하여 POS 정보를 조회
-
 * 주소 API
    - 찾으려는 주소가 있는지 조회하고 주소에 해당하는 레스토랑이 POS에 있는지 조회
    - 찾으려는 주소가 있는지 조회하고 있을 경우 특정기간에 한해서 주소에 해당하는 레스토랑이 POS 있는지 조회
