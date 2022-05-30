@@ -2,11 +2,11 @@
 
 # 목차
 
-- [Bearrobotics_기업과제](#Bearrobotics_기업과제)
+- [Bearrobotics 기업과제](#Bearrobotics_기업과제)
 - [과제 해석](#과제-해석)
 - [구현 요구사항](#구현-요구사항)
 - [구현](#구현)
-- [Author](#Author)
+- [](#Author)
 
 # Bearrobotics_기업과제
 원티드 프리온보딩 코스 _ 두번째 기업과제 _ 베어로보틱스
@@ -75,8 +75,8 @@
 > ### ERD
 <img src="./source/bearrobotics_erd.png" alt="erd"/>
 
-> ### See Document
-> http://13.125.224.101/swagger
+> ### API 명세
+> [See Document](http://13.125.224.101/swagger)
 
 > ### 구현 과정 중 특이사항
 >- utils/db_uploader.py를 사용하여 주어진 데이터셋을 database에 바로 저장해 요구사항을 확인, 구현하였습니다.
