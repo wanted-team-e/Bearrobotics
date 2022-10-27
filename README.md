@@ -2,17 +2,19 @@
 
 # 목차
 
-- [Bearrobotics 기업과제](#Bearrobotics_기업과제)
+- [Bearrobotics 기업과제](#bearrobotics_기업과제)
 - [과제 해석](#과제-해석)
 - [구현 요구사항](#구현-요구사항)
 - [구현](#구현)
-- [](#Author)
+- [API 명세](#api-명세)
+- [Step to run](#step-to-run)
+- [Author](#author)
 
 # Bearrobotics_기업과제
 원티드 프리온보딩 코스 _ 두번째 기업과제 _ 베어로보틱스
 
 
-### 배포 주소 [GoTo](http://13.125.224.101/api/users/signup)
+### 배포 주소 --> 현재 비용 문제로 인해 내려둔 상태입니다.
 ### 팀 노션 [GoTo](https://www.notion.so/Bearrobotics-a520ef6ae09246488ab573ad247083ee)
 - 요구사항 분석, 정보 공유 및 프로젝트 진행을 위해 사용
 
@@ -76,7 +78,7 @@
 <img src="./source/bearrobotics_erd.png" alt="erd"/>
 
 > ### API 명세
-> [See Document](http://13.125.224.101/swagger)
+> --> 현재 비용 문제로 인해 내려둔 상태입니다.
 
 > ### 구현 과정 중 특이사항
 >- utils/db_uploader.py를 사용하여 주어진 데이터셋을 database에 바로 저장해 요구사항을 확인, 구현하였습니다.
